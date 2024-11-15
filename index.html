@@ -1,0 +1,165 @@
+<!DOCTYPE html> 
+<html lang="en">   
+<head>     
+  <meta charset="UTF-8" />     
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />     
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.4.0/fonts/remixicon.css" rel="stylesheet" />     
+  <link rel="stylesheet" href="styles.css" />     
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">     
+  <title>MPOX DETECTOR | MPOX DETECTOR</title>   
+</head>   
+
+<body>     
+
+  <!-- Header Section with Background Video -->
+  <header style="position: relative; width: 100%; height: 100vh; overflow: hidden;">      
+    <video autoplay muted loop style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1;">       
+      <source src="assets/doctor.mp4" type="video/mp4">     
+    </video>       
+
+    <!-- Navigation Bar -->
+    <nav class="section__container nav__container">         
+      <div class="nav__logo">           
+        <img src="assets/logompox.png" class="logo">           
+        MPOX<span>DETECTOR</span>         
+      </div>         
+      <ul class="nav__links">           
+        <li class="link"><a href="#home">Home</a></li>           
+        <li class="link"><a href="#service">Detectors</a></li>           
+        <li class="link live-link">             
+          <span class="blinking-dot"></span>             
+          <a href="#live">LIVE</a>           
+        </li>           
+        <li class="link"><a href="#about">About us</a></li>           
+        <li class="link"><a href="#blog">Features</a></li>         
+      </ul>         
+      <button class="btn"><a href="#contact">Contact Us</a></button>       
+    </nav>       
+
+    <!-- Header Content Section -->
+    <div class="section__container header__container" id="home">         
+      <div class="header__content">           
+        <h1>Revolutionizing Diagnosis with AI-Powered Solutions</h1>           
+        <p>             
+          Welcome, discover our Mpox Detector, an advanced deep learning model that accurately identifies mpox and 14 similar skin diseases from skin lesions. Paired with our Symptom-Based Detector, it engages patients to assess symptoms and provides predictive scores, all powered by cutting-edge CNN technology. Empowering healthcare with precise, real-time diagnostics.           
+        </p>         
+      </div>         
+      
+      <!-- Optional Header Form Section -->
+      <div class="header__form">           
+        <!-- Form can be added here if needed -->         
+      </div>       
+    </div>     
+  </header>     
+
+  <!-- Service Section for Detectors -->
+  <div class="service__header">         
+      <div class="service__header__content">           
+        <h2 section class="section__container service__container" id="service">       
+    <b>DETECTORS</b></h2>           
+        <p>Select the required model:</p>         
+      </div>       
+    </div>       
+    <div class="service__grid">         
+      <div class="service__card">           
+        <span><i class="ri-microscope-line"></i></span>           
+        <h4>Skin Lesion Detector</h4>           
+        <p>An advanced deep learning-based skin lesions detector designed to assist in the diagnosis of skin conditions.</p>           
+        <a href="MPOXSBD.h5">Learn More</a>
+        
+      </div>         
+      <div class="service__card">           
+        <span><i class="ri-mental-health-line"></i></span>           
+        <h4>Symptom Based Detector</h4>           
+        <p>An innovative symptom-based Monkeypox detection system that uses machine learning to predict whether a patient is positive or negative for Monkeypox.</p>           
+        <a href="chatinterface.py">Learn More</a>         
+      </div>       
+    </div>     
+  </section>     
+
+  <!-- Live Data Section -->
+  <section class="section__container service__container" id="live">       
+    <div class="service__header">         
+      <div class="service__header__content">           
+        <h2 class="section__header">LIVE MPOX DATA</h2>           
+        <p>Monitor real-time cumulative confirmed and suspected cases of Mpox below.</p>           
+        <iframe src="https://ourworldindata.org/explorers/monkeypox?uniformYAxis=0&Metric=Confirmed+and+suspected+cases&Frequency=Cumulative&Relative+to+population=false&country=COD~COG~CMR~BDI" width="100%" height="800px" frameborder="0" allowfullscreen="true" style="border:0; padding: 0 40px"></iframe>         
+      </div>       
+    </div>     
+  </section>     
+
+  <!-- About Us Section -->
+  <section class="section__container about__container" id="about">       
+    <div class="about__content">         
+      <h2 class="section__header">About Us</h2>         
+      <p>Welcome to Mpox Detector, we are dedicated to advancing healthcare through innovative technology...</p>       
+    </div>       
+    <div class="about__image">         
+      <img src="assets/mpoxlogo.png" alt="about" />       
+    </div>     
+  </section>     
+
+  <!-- Features Section -->
+  <section class="section__container why__container" id="blog">       
+    <div class="why__image">         
+      <img src="assets/features.jpg" alt="why choose us" />       
+    </div>       
+    <div class="why__content">         
+      <h2 class="section__header">FEATURES</h2>         
+      <p>We prioritize user confidentiality with robust data protection measures ensuring your health data stays secure.</p>         
+      <div class="why__grid">           
+        <span><i class="ri-search-eye-line"></i></span>           
+        <div>             
+          <h4>Dual Detection Methods</h4>             
+          <p>Utilize advanced image recognition technology to accurately identify and classify skin lesions associated with mpox.</p>           
+        </div>           
+        <span><i class="fas fa-user-check"></i></span>           
+        <div>             
+          <h4>User-Friendly Interface</h4>             
+          <p>A clean and straightforward interface makes it easy for users to upload images or fill out the symptom questionnaire.</p>           
+        </div>           
+        <span><i class="fas fa-graduation-cap"></i></span>           
+        <div>             
+          <h4>Educational Insights</h4>             
+          <p>Each detection provides comprehensive insights including potential skin conditions, recommended actions, and links to additional resources.</p>           
+        </div>         
+      </div>       
+    </div>     
+  </section>     
+
+  <!-- Footer Section -->
+  <footer id="contact" class="footer">       
+    <div class="section__container footer__container">         
+      <div class="footer__col">           
+        <h3>MPOX<span>DETECTOR</span></h3>           
+        <p>We are honored to be a part of your healthcare journey...</p>         
+      </div>         
+      <div class="footer__col">           
+        <h4>About Us</h4>           
+        <p>Home</p>           
+        <p>About Us</p>           
+        <p>Work With Us</p>           
+        <p>Our Blog</p>           
+        <p>Terms & Conditions</p>         
+      </div>         
+      <div class="footer__col">           
+        <h4>Contact Us</h4>           
+        <p><i class="ri-map-pin-2-fill"></i> MPOX PVT LTD., TRICHY, INDIA</p>           
+        <p><i class="ri-mail-fill"></i> mpoxml@gmail.com</p>           
+        <p><i class="ri-phone-fill"></i> (+91) 9963830194, 9751120169</p>         
+      </div>       
+    </div>       
+    <div class="footer__bar">         
+      <div class="footer__bar__content">           
+        <p>Copyright © 2024 MPOX DETECTOR. All rights reserved.</p>           
+        <div class="footer__socials">             
+          <span><i class="ri-instagram-line"></i></span>             
+          <span><i class="ri-facebook-fill"></i></span>             
+          <span><i class="ri-linkedin-fill"></i></span>             
+          <span><i class="ri-twitter-fill"></i></span>           
+        </div>         
+      </div>       
+    </div>     
+  </footer>   
+</body> 
+</html>
