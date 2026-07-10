@@ -1,0 +1,14 @@
+# Single-backbone benchmark: ConvNeXt-Tiny (best single model, 69.3%).
+name: convnext_tiny
+backbone: ConvNeXtTiny
+pooled_dim: 768
+preprocess: convnext
+frozen: true                  # frozen feature extractor + trained head
+device: cpu                   # tensorflow-metal lacks ops for ConvNeXt; extract on CPU
+head:
+  dense: [256, 128]
+  batchnorm: true
+  dropout: 0.5
+  epochs: 40
+  lr: 0.001
+seed: 42
