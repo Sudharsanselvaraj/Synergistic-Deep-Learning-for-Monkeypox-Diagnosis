@@ -37,14 +37,14 @@ and number is regenerated from code on a strictly **leakage-free** split — not
 
 ## Key Features
 
-- ✅ Reproducible, leakage-free training & evaluation pipeline
-- 🧠 Modern backbones — **ConvNeXt-Tiny**, **DenseNet201**, **InceptionResNetV2**, EfficientNet(B4/V2-S)
-- 🔗 **Feature-level fusion** (Concat-MLP / attention / transformer) + PSO / Mean ensembles
-- 🩹 Separate **binary Mpox screening** task with sensitivity/specificity + CIs
-- 🔍 **Grad-CAM** explainability
-- 📊 5-fold cross-validation, McNemar's test, Cohen's κ, ensemble-diversity analysis
-- 📦 Installable **Python package** + unified **command-line interface**
-- 🐳 **Docker** support, GitHub Actions CI, and a model zoo with downloadable weights
+- Reproducible, leakage-free training & evaluation pipeline
+- Modern backbones — **ConvNeXt-Tiny**, **DenseNet201**, **InceptionResNetV2**, EfficientNet(B4/V2-S)
+- **Feature-level fusion** (Concat-MLP / attention / transformer) + PSO / Mean ensembles
+- Separate **binary Mpox screening** task with sensitivity/specificity + confidence intervals
+- **Grad-CAM** explainability
+- 5-fold cross-validation, McNemar's test, Cohen's κ, ensemble-diversity analysis
+- Installable **Python package** + unified **command-line interface**
+- **Docker** support, GitHub Actions CI, and a model zoo with downloadable weights
 
 ## Original Publication
 
@@ -195,7 +195,7 @@ as required by *Scientific Reports*' policy on custom computational tools. Recom
 > and on PyPI (`pip install mpox-trinet`), archived on Zenodo at DOI: *pending — archive a tagged
 > release via the GitHub–Zenodo integration to mint one*.
 
-To mint the DOI: connect the repo to Zenodo (Zenodo → GitHub → toggle this repo on, then publish a
+To mint the DOI: connect the repo to Zenodo (Zenodo -> GitHub -> toggle this repo on, then publish a
 release), and add the resulting DOI badge here and to the manuscript.
 
 ## Citation
