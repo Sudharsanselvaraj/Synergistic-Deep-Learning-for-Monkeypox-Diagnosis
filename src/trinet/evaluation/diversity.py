@@ -11,10 +11,10 @@ that with standard diversity measures over the base models' TEST predictions:
 
 Output: results/tables/diversity.csv
 """
+
 from __future__ import annotations
-import sys
+
 from itertools import combinations
-from pathlib import Path
 
 import numpy as np
 
@@ -24,8 +24,9 @@ from trinet.config import CFG, ensure_dirs  # noqa: E402
 def _preds(tag: str = ""):
     mid = f"{tag}_" if tag else ""
     y = np.load(CFG.features / "y_test.npy")
-    preds = {bb: np.load(CFG.model_dir / f"prob_test_{mid}{bb}.npy").argmax(1)
-             for bb in CFG.backbones}
+    preds = {
+        bb: np.load(CFG.model_dir / f"prob_test_{mid}{bb}.npy").argmax(1) for bb in CFG.backbones
+    }
     return y, preds
 
 
@@ -37,14 +38,18 @@ def _pair_stats(y, a, b) -> dict:
     n00 = int(np.sum(~ca & ~cb))
     n = len(y)
     disagree = (n10 + n01) / n
-    denom = (n11 * n00 + n01 * n10)
+    denom = n11 * n00 + n01 * n10
     q = (n11 * n00 - n01 * n10) / denom if denom else 0.0
     # correlation of correctness
     va, vb = ca.astype(float), cb.astype(float)
     sd = va.std() * vb.std()
     rho = float(np.mean((va - va.mean()) * (vb - vb.mean())) / sd) if sd else 0.0
-    return {"disagreement": round(disagree, 4), "Q": round(q, 4),
-            "rho": round(rho, 4), "double_fault": round(n00 / n, 4)}
+    return {
+        "disagreement": round(disagree, 4),
+        "Q": round(q, 4),
+        "rho": round(rho, 4),
+        "double_fault": round(n00 / n, 4),
+    }
 
 
 def main() -> None:
@@ -63,11 +68,15 @@ def main() -> None:
 
     print("Pairwise diversity (test):")
     for r in rows:
-        print(f"  {r['pair']:<36} disagree={r['disagreement']}  Q={r['Q']}  "
-              f"rho={r['rho']}  double_fault={r['double_fault']}")
-    print(f"  {'MEAN':<36} disagree={mean_row['disagreement']}  Q={mean_row['Q']}  "
-          f"rho={mean_row['rho']}  double_fault={mean_row['double_fault']}")
-    print(f"\n[✓] diversity -> {CFG.tbl_dir/'diversity.csv'}")
+        print(
+            f"  {r['pair']:<36} disagree={r['disagreement']}  Q={r['Q']}  "
+            f"rho={r['rho']}  double_fault={r['double_fault']}"
+        )
+    print(
+        f"  {'MEAN':<36} disagree={mean_row['disagreement']}  Q={mean_row['Q']}  "
+        f"rho={mean_row['rho']}  double_fault={mean_row['double_fault']}"
+    )
+    print(f"\n[✓] diversity -> {CFG.tbl_dir / 'diversity.csv'}")
 
 
 if __name__ == "__main__":

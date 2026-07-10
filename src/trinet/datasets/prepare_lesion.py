@@ -9,9 +9,10 @@ Sources (see PROJECT_PLAN.md):
 Output: data/processed/{train,val,test}/<ClassName>/*.jpg  (class folders Keras can read),
 plus a manifest.csv and a printed count table. Stratified, seeded, split on unique images.
 """
+
 from __future__ import annotations
+
 import shutil
-import sys
 from collections import defaultdict
 from pathlib import Path
 
@@ -23,14 +24,22 @@ IMG_EXT = {".jpg", ".jpeg", ".png", ".bmp"}
 
 # target class name -> list of source folder-name aliases (case-insensitive match on dir name)
 POX_MAP = {
-    "Mpox": ["Monkeypox"], "Chickenpox": ["Chickenpox"], "Cowpox": ["Cowpox"],
-    "Measles": ["Measles"], "HFMD": ["HFMD"], "Healthy": ["Healthy"],
+    "Mpox": ["Monkeypox"],
+    "Chickenpox": ["Chickenpox"],
+    "Cowpox": ["Cowpox"],
+    "Measles": ["Measles"],
+    "HFMD": ["HFMD"],
+    "Healthy": ["Healthy"],
 }
 DERM_MAP = {
-    "Melanoma": ["melanoma"], "MelanocyticNevi": ["nevus"],
-    "BasalCellCarcinoma": ["basal cell carcinoma"], "ActinicKeratosis": ["actinic keratosis"],
-    "BenignKeratosis": ["pigmented benign keratosis"], "Dermatofibroma": ["dermatofibroma"],
-    "VascularLesion": ["vascular lesion"], "SquamousCellCarcinoma": ["squamous cell carcinoma"],
+    "Melanoma": ["melanoma"],
+    "MelanocyticNevi": ["nevus"],
+    "BasalCellCarcinoma": ["basal cell carcinoma"],
+    "ActinicKeratosis": ["actinic keratosis"],
+    "BenignKeratosis": ["pigmented benign keratosis"],
+    "Dermatofibroma": ["dermatofibroma"],
+    "VascularLesion": ["vascular lesion"],
+    "SquamousCellCarcinoma": ["squamous cell carcinoma"],
 }
 
 
@@ -64,8 +73,8 @@ def _split(files: list[Path], rng: np.random.Generator) -> dict[str, list[Path]]
     n_tr = int(round(CFG.train_frac * n))
     n_va = int(round(CFG.val_frac * n))
     tr = [files[i] for i in idx[:n_tr]]
-    va = [files[i] for i in idx[n_tr:n_tr + n_va]]
-    te = [files[i] for i in idx[n_tr + n_va:]]
+    va = [files[i] for i in idx[n_tr : n_tr + n_va]]
+    te = [files[i] for i in idx[n_tr + n_va :]]
     return {"train": tr, "val": va, "test": te}
 
 

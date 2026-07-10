@@ -12,7 +12,9 @@ Usage:
     python -m src.data.download            # all datasets
     python -m src.data.download --only msld_v2 symptom
 """
+
 from __future__ import annotations
+
 import argparse
 import sys
 from pathlib import Path
@@ -21,17 +23,18 @@ from trinet.config import CFG, ensure_dirs  # noqa: E402
 
 # name -> (kaggle slug, is_competition?)  — datasets only here
 DATASETS = {
-    "msld_v2":    "joydippaul/mpox-skin-lesion-dataset-version-20-msld-v20",  # 6 pox classes, ~595 MB
-    "dermoscopy": "nodoubttome/skin-cancer9-classesisic",                     # 8 derm classes, ~1.6 GB
-    "symptom":    "shuvoalok/monkeypox-dataset",                              # symptom CSV, ~300 KB
+    "msld_v2": "joydippaul/mpox-skin-lesion-dataset-version-20-msld-v20",  # 6 pox classes, ~595 MB
+    "dermoscopy": "nodoubttome/skin-cancer9-classesisic",  # 8 derm classes, ~1.6 GB
+    "symptom": "shuvoalok/monkeypox-dataset",  # symptom CSV, ~300 KB
 }
 
 
 def _check_kaggle() -> None:
     import os
+
     kdir = Path.home() / ".kaggle"
-    classic = kdir / "kaggle.json"           # classic {username,key}
-    access = kdir / "access_token"           # newer KGAT_ token
+    classic = kdir / "kaggle.json"  # classic {username,key}
+    access = kdir / "access_token"  # newer KGAT_ token
     has_env = bool(os.environ.get("KAGGLE_API_TOKEN") or os.environ.get("KAGGLE_KEY"))
     if not (classic.exists() or access.exists() or has_env):
         sys.exit(
@@ -48,6 +51,7 @@ def _check_kaggle() -> None:
 
 def _api():
     from kaggle.api.kaggle_api_extended import KaggleApi
+
     api = KaggleApi()
     api.authenticate()
     return api

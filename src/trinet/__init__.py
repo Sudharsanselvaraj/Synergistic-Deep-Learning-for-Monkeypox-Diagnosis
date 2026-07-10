@@ -8,6 +8,7 @@ Quick start:
     from trinet.models.backbones import build_feature_extractor
     from trinet.models.fusion import build_concat_mlp
 """
+
 from trinet.config import CFG
 
 __version__ = "2.0.0"

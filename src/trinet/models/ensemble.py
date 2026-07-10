@@ -12,17 +12,18 @@ Outputs:
   results/models/pso_weights.json          (best weights + val accuracy + convergence history)
   results/tables/ensemble_scores.csv       (PSO test metrics + optimizer comparison)
 """
+
 from __future__ import annotations
+
 import json
-import sys
 import time
 from itertools import product
 from pathlib import Path
 
 import numpy as np
 
-from trinet.config import CFG, ensure_dirs             # noqa: E402
-from trinet.evaluation.metrics import compute_scores      # noqa: E402
+from trinet.config import CFG, ensure_dirs  # noqa: E402
+from trinet.evaluation.metrics import compute_scores  # noqa: E402
 
 
 def _prob_path(split: str, bb: str, tag: str) -> Path:
@@ -78,23 +79,26 @@ def opt_random(probs, y, n=2000, seed=CFG.seed):
 
 def opt_pso(probs, y):
     import pyswarms as ps
+
     d = len(CFG.backbones)
 
     def cost(X):
         return np.array([1.0 - val_accuracy(x, probs, y) for x in X])
 
     opt = ps.single.GlobalBestPSO(
-        n_particles=CFG.pso_particles, dimensions=d,
+        n_particles=CFG.pso_particles,
+        dimensions=d,
         options={"c1": CFG.pso_c1, "c2": CFG.pso_c2, "w": CFG.pso_w},
         bounds=(np.zeros(d), np.ones(d)),
     )
     _, pos = opt.optimize(cost, iters=CFG.pso_iters, verbose=False)
-    history = [1.0 - c for c in opt.cost_history]   # cost -> val accuracy
+    history = [1.0 - c for c in opt.cost_history]  # cost -> val accuracy
     return _normalize(pos), history
 
 
 def main() -> None:
     import argparse
+
     ap = argparse.ArgumentParser()
     ap.add_argument("--tag", default="", help="prob-file tag, e.g. 'ft' for fine-tuned models")
     tag = ap.parse_args().tag
@@ -110,31 +114,56 @@ def main() -> None:
         w, hist = fn(val_probs, y_val)
         dt = time.time() - t0
         v_acc = val_accuracy(w, val_probs, y_val)
-        s = compute_scores(y_test, ensemble_prob(w, test_probs).argmax(1),
-                            ensemble_prob(w, test_probs))
-        rows.append({"method": name, "weights": [round(float(x), 4) for x in _normalize(w)],
-                     "val_acc": round(100 * v_acc, 2), "time_s": round(dt, 2),
-                     **s.as_pct()})
-        print(f"[{name:>6}] w={_normalize(w).round(3)} val_acc={100*v_acc:.2f} "
-              f"test_acc={s.as_pct()['accuracy']} time={dt:.2f}s")
+        s = compute_scores(
+            y_test, ensemble_prob(w, test_probs).argmax(1), ensemble_prob(w, test_probs)
+        )
+        rows.append(
+            {
+                "method": name,
+                "weights": [round(float(x), 4) for x in _normalize(w)],
+                "val_acc": round(100 * v_acc, 2),
+                "time_s": round(dt, 2),
+                **s.as_pct(),
+            }
+        )
+        print(
+            f"[{name:>6}] w={_normalize(w).round(3)} val_acc={100 * v_acc:.2f} "
+            f"test_acc={s.as_pct()['accuracy']} time={dt:.2f}s"
+        )
         if name == "PSO":
             pso_history, pso_weights = hist, _normalize(w).tolist()
 
-    (CFG.model_dir / f"pso_weights{suffix}.json").write_text(json.dumps({
-        "backbones": CFG.backbones, "weights": pso_weights,
-        "val_accuracy": val_accuracy(pso_weights, val_probs, y_val),
-        "convergence": pso_history,
-    }, indent=2))
+    (CFG.model_dir / f"pso_weights{suffix}.json").write_text(
+        json.dumps(
+            {
+                "backbones": CFG.backbones,
+                "weights": pso_weights,
+                "val_accuracy": val_accuracy(pso_weights, val_probs, y_val),
+                "convergence": pso_history,
+            },
+            indent=2,
+        )
+    )
 
-    cols = ["method", "weights", "val_acc", "accuracy", "precision", "recall", "f1", "auc",
-            "kappa", "time_s"]
+    cols = [
+        "method",
+        "weights",
+        "val_acc",
+        "accuracy",
+        "precision",
+        "recall",
+        "f1",
+        "auc",
+        "kappa",
+        "time_s",
+    ]
     lines = [",".join(cols)]
     for r in rows:
         lines.append(",".join(json.dumps(r[c]) if c == "weights" else str(r[c]) for c in cols))
     (CFG.tbl_dir / f"ensemble_scores{suffix}.csv").write_text("\n".join(lines))
     (CFG.tbl_dir / f"ensemble_scores{suffix}.json").write_text(json.dumps(rows, indent=2))
-    print(f"\n[✓] ensemble scores -> {CFG.tbl_dir/f'ensemble_scores{suffix}.csv'}")
-    print(f"    next: python -m src.eval.run_all{' --tag '+tag if tag else ''}")
+    print(f"\n[✓] ensemble scores -> {CFG.tbl_dir / f'ensemble_scores{suffix}.csv'}")
+    print(f"    next: python -m src.eval.run_all{' --tag ' + tag if tag else ''}")
 
 
 if __name__ == "__main__":

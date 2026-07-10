@@ -10,12 +10,10 @@ Two things are built from the same spec:
   - `build_head(input_dim)`         : the trainable classifier on top of cached features
   - `build_full_model(name)`        : end-to-end (used for fine-tuning + Grad-CAM)
 """
-from __future__ import annotations
-import sys
-from pathlib import Path
 
-import tensorflow as tf
-from tensorflow.keras import layers, Model
+from __future__ import annotations
+
+from tensorflow.keras import Model, layers
 from tensorflow.keras import applications as apps
 
 from trinet.config import CFG  # noqa: E402
@@ -70,8 +68,9 @@ def build_head(input_dim: int, n_classes: int = CFG.n_classes) -> Model:
     return Model(inp, out, name="head")
 
 
-def build_full_model(name: str, n_classes: int = CFG.n_classes,
-                     finetune_unfreeze: int = 0) -> Model:
+def build_full_model(
+    name: str, n_classes: int = CFG.n_classes, finetune_unfreeze: int = 0
+) -> Model:
     """End-to-end model (preprocess -> backbone -> head). For fine-tuning and Grad-CAM.
 
     finetune_unfreeze>0 unfreezes the last N backbone layers.

@@ -7,25 +7,28 @@ DenseNet201], each overlaid with the class-activation heatmap for the predicted 
 
 Output: results/figures/gradcam.png
 """
+
 from __future__ import annotations
-import sys
+
 from pathlib import Path
 
 import numpy as np
 import tensorflow as tf
+
 # tensorflow-metal can't compile the Grad-CAM gradient graph ("MLIR pass manager failed"),
 # so run this on CPU — it's only a handful of images and gradients, instant either way.
 tf.config.set_visible_devices([], "GPU")
 import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
-import matplotlib.cm as cm
-from tensorflow.keras import layers, Model
-from tensorflow.keras.models import load_model
-from tensorflow.keras.utils import load_img, img_to_array
 
-from trinet.config import CFG                                  # noqa: E402
-from trinet.models.backbones import build_backbone, _SPEC   # noqa: E402
+matplotlib.use("Agg")
+import matplotlib.cm as cm
+import matplotlib.pyplot as plt
+from tensorflow.keras import Model, layers
+from tensorflow.keras.models import load_model
+from tensorflow.keras.utils import img_to_array, load_img
+
+from trinet.config import CFG  # noqa: E402
+from trinet.models.backbones import _SPEC, build_backbone  # noqa: E402
 
 IMG_EXT = {".jpg", ".jpeg", ".png", ".bmp"}
 
@@ -107,15 +110,22 @@ def main() -> None:
             hm, cls = _heatmap(gm, prep, raw)
             axes[r, c].imshow(_overlay(raw, hm))
             axes[r, c].set_title(bb if r == 0 else "", fontsize=8)
-            axes[r, c].text(4, 18, CFG.lesion_classes[cls], color="white", fontsize=7,
-                            bbox=dict(facecolor="black", alpha=0.5, pad=1))
+            axes[r, c].text(
+                4,
+                18,
+                CFG.lesion_classes[cls],
+                color="white",
+                fontsize=7,
+                bbox=dict(facecolor="black", alpha=0.5, pad=1),
+            )
         for c in range(ncol):
-            axes[r, c].set_xticks([]); axes[r, c].set_yticks([])
+            axes[r, c].set_xticks([])
+            axes[r, c].set_yticks([])
     fig.suptitle("Grad-CAM — Tri-Net base models", fontsize=11)
     fig.tight_layout()
     fig.savefig(CFG.fig_dir / "gradcam.png")
     plt.close(fig)
-    print(f"[✓] Grad-CAM -> {CFG.fig_dir/'gradcam.png'}")
+    print(f"[✓] Grad-CAM -> {CFG.fig_dir / 'gradcam.png'}")
 
 
 if __name__ == "__main__":
