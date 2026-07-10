@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="assets/mpox_logo.png" width="220" alt="MPOX">
+<img src="assets/mpox_logo.png" width="270" alt="MPOX">
 
-# Tri-Net v2
+## Tri-Net v2
 
 ### A Reproducible Deep-Learning Framework for Multi-Class Skin-Lesion and Symptom-Based Monkeypox (Mpox) Diagnosis
 
