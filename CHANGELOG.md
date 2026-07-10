@@ -4,6 +4,19 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/) and this project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+- CLI commands: `predict` (single-image inference), `doctor` (environment check),
+  `export` (SavedModel/ONNX), `explain` (Grad-CAM).
+- `trinet.inference` package (predict, export) and `examples/` (predict, batch, export, custom).
+- GitHub Actions (tests, lint, release), Docker (`docker/`), Model Zoo (`docs/model_zoo.md`).
+
+### Fixed
+- Fusion checkpoint now saves **weights + meta** and rebuilds the architecture from code, with a
+  post-save verification. A prior full-model `.keras` save had silently produced a broken
+  reload; reported metrics were always computed from the correct in-memory model.
+
 ## [2.0.0] - 2026-07-10
 
 Complete rebuild as **Tri-Net v2** — a reproducible framework replacing the original,
