@@ -1,0 +1,13 @@
+# Binary Mpox-vs-rest screening (the clinical task).
+# Derived from the 14-class champion by collapsing predictions to Mpox / Non-Mpox.
+name: mpox_screening
+task: binary
+positive_class: Mpox
+source_model: fusion_champion   # Concat+MLP over the best-3 backbones
+metrics: [accuracy, auc, sensitivity, specificity, precision]
+report:
+  confidence_intervals: wilson
+  note: >-
+    Report sensitivity and specificity alongside accuracy; the test set is class-imbalanced
+    (29 Mpox / 274 non-Mpox), so accuracy alone is not sufficient.
+seed: 42

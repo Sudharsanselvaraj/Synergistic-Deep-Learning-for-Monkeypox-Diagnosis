@@ -1,0 +1,14 @@
+# PSO ensemble configuration (Phase-1/2A weighted probability fusion).
+name: pso_ensemble
+task: 14-class
+backbones: [ConvNeXtTiny, InceptionResNetV2, DenseNet201]
+pso:
+  particles: 20
+  iters: 100
+  inertia_w: 0.7
+  cognitive_c1: 1.5
+  social_c2: 1.5
+constraint: "w >= 0, sum(w) = 1"
+objective: validation_accuracy
+baselines: [Equal, Grid, Random]
+seed: 42

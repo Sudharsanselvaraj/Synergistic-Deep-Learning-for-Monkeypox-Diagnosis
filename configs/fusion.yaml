@@ -1,0 +1,16 @@
+# Fusion-strategy ablation (Phase-2B) — the champion configuration.
+# Mirrors trinet.config.CFG; documents the exact settings for the 77.23% result.
+name: fusion_ablation
+task: 14-class
+backbones: [ConvNeXtTiny, InceptionResNetV2, DenseNet201]
+image_size: [224, 224]
+aug_multiplier: 5              # cached augmented train views
+strategies: [Mean, PSO, Concat+MLP, GatedAttention, Transformer]
+head:
+  proj_dim: 256
+  dropout: 0.5
+  epochs: 40
+  lr: 0.001
+  early_stop_patience: 8
+seed: 42
+champion: Concat+MLP           # best test accuracy
