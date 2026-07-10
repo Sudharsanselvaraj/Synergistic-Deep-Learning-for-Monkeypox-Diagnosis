@@ -25,10 +25,9 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.utils import image_dataset_from_directory
 from sklearn.utils import class_weight as cw
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from config import CFG, ensure_dirs               # noqa: E402
-from src.models.backbones import build_full_model  # noqa: E402
-from src.eval.metrics import compute_scores        # noqa: E402
+from trinet.config import CFG, ensure_dirs               # noqa: E402
+from trinet.models.backbones import build_full_model  # noqa: E402
+from trinet.evaluation.metrics import compute_scores        # noqa: E402
 
 _AUG = tf.keras.Sequential([
     layers.RandomFlip("horizontal_and_vertical", seed=CFG.seed),

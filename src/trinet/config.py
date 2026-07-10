@@ -1,12 +1,13 @@
 """Central configuration for the Tri-Net MPOX project.
 
 Everything paths, class names, and hyperparameters live here so scripts stay thin and
-the whole pipeline is reproducible. Import as `from config import CFG`.
+the whole pipeline is reproducible. Import as `from trinet.config import CFG`.
 """
 from __future__ import annotations
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent
+# repo root is three levels up from src/trinet/config.py
+ROOT = Path(__file__).resolve().parents[2]
 
 
 class CFG:
@@ -15,11 +16,13 @@ class CFG:
     data_raw = ROOT / "data" / "raw"
     data_proc = ROOT / "data" / "processed"      # train/ val/ test/ class-folders
     features = ROOT / "data" / "features"         # cached backbone features (.npy)
-    results = ROOT / "results"
-    fig_dir = results / "figures"
-    tbl_dir = results / "tables"
-    model_dir = results / "models"
-    log_dir = results / "logs"
+    outputs = ROOT / "outputs"                    # generated artifacts (git-ignored)
+    fig_dir = outputs / "figures"
+    tbl_dir = outputs / "reports"
+    model_dir = outputs / "checkpoints"
+    pred_dir = outputs / "predictions"
+    log_dir = outputs / "logs"
+    results = outputs                             # backwards-compat alias
 
     # ---- image lesion module ----
     # 14 classes, matching Fig. 3 of the paper. Order is fixed for reproducibility.
@@ -79,8 +82,8 @@ class CFG:
 
 
 def ensure_dirs() -> None:
-    for p in [CFG.data_raw, CFG.data_proc, CFG.features, CFG.results,
-              CFG.fig_dir, CFG.tbl_dir, CFG.model_dir, CFG.log_dir]:
+    for p in [CFG.data_raw, CFG.data_proc, CFG.features, CFG.outputs,
+              CFG.fig_dir, CFG.tbl_dir, CFG.model_dir, CFG.pred_dir, CFG.log_dir]:
         p.mkdir(parents=True, exist_ok=True)
 
 

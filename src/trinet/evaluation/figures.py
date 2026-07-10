@@ -22,10 +22,9 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from sklearn.metrics import roc_curve, auc as sk_auc
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from config import CFG, ensure_dirs                              # noqa: E402
-from src.eval.metrics import compute_scores, confusion, mcnemar  # noqa: E402
-from src.models.pso_ensemble import ensemble_prob                # noqa: E402
+from trinet.config import CFG, ensure_dirs                              # noqa: E402
+from trinet.evaluation.metrics import compute_scores, confusion, mcnemar  # noqa: E402
+from trinet.models.ensemble import ensemble_prob                # noqa: E402
 
 plt.rcParams.update({"figure.dpi": 130, "font.size": 9})
 

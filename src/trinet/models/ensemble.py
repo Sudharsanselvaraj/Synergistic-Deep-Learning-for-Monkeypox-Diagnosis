@@ -21,9 +21,8 @@ from pathlib import Path
 
 import numpy as np
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from config import CFG, ensure_dirs             # noqa: E402
-from src.eval.metrics import compute_scores      # noqa: E402
+from trinet.config import CFG, ensure_dirs             # noqa: E402
+from trinet.evaluation.metrics import compute_scores      # noqa: E402
 
 
 def _prob_path(split: str, bb: str, tag: str) -> Path:

@@ -28,10 +28,9 @@ import tensorflow as tf
 from tensorflow.keras import layers, Model
 from sklearn.utils import class_weight as cw
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from config import CFG, ensure_dirs           # noqa: E402
-from src.models.backbones import feature_dim   # noqa: E402
-from src.eval.metrics import compute_scores     # noqa: E402
+from trinet.config import CFG, ensure_dirs           # noqa: E402
+from trinet.models.backbones import feature_dim   # noqa: E402
+from trinet.evaluation.metrics import compute_scores     # noqa: E402
 
 PROJ_DIM = 256
 

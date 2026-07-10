@@ -24,9 +24,8 @@ from tensorflow.keras import layers, Model
 from tensorflow.keras.models import load_model
 from tensorflow.keras.utils import load_img, img_to_array
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from config import CFG                                  # noqa: E402
-from src.models.backbones import build_backbone, _SPEC   # noqa: E402
+from trinet.config import CFG                                  # noqa: E402
+from trinet.models.backbones import build_backbone, _SPEC   # noqa: E402
 
 IMG_EXT = {".jpg", ".jpeg", ".png", ".bmp"}
 
