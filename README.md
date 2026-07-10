@@ -1,61 +1,77 @@
-# Tri-Net MPOX — Monkeypox Detection (rebuild)
+<div align="center">
 
-Real, reproducible implementation of the paper *"Tri-Net: Unified Deep Learning for Skin
-Lesion and Symptom-Based Monkeypox Detection."* The published paper's code was a skeleton;
-this repo rebuilds the actual system — a **PSO-optimized 3-backbone ensemble** for 14-class
-skin-lesion classification plus an honest **symptom classifier** — and reproduces every
-figure and table from runnable code. See [`PROJECT_PLAN.md`](PROJECT_PLAN.md) for the full
-plan and the paper-vs-code gap we're closing.
+# Tri-Net v2
 
-Runs locally on **Apple Silicon (M-series)** via `tensorflow-metal`.
+**A reproducible deep-learning framework for Mpox skin-lesion diagnosis**
 
-## Setup
+[![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
+[![TensorFlow](https://img.shields.io/badge/TensorFlow-2.16-orange)](https://www.tensorflow.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Code style: ruff](https://img.shields.io/badge/lint-ruff-purple)](https://github.com/astral-sh/ruff)
 
-```bash
-python3 -m venv .venv
-.venv/bin/pip install -r requirements.txt
-.venv/bin/python config.py          # create data/ + results/ dirs, sanity-check
-```
+</div>
 
-Verify the Metal GPU is picked up:
-```bash
-.venv/bin/python -c "import tensorflow as tf; print(tf.config.list_physical_devices('GPU'))"
-```
+Tri-Net v2 is an honest, leakage-free rebuild of the *Tri-Net* Mpox-diagnosis work. It couples
+modern CNN backbones with **learned feature fusion** and a rigorous evaluation suite, and it
+reports two clearly-separated tasks: **14-class fine-grained diagnosis** and **binary Mpox
+screening**.
 
-## Data
+## Results
 
-Needs a **Kaggle API token**: kaggle.com → Settings → *Create New API Token* → save as
-`~/.kaggle/kaggle.json`, then `chmod 600 ~/.kaggle/kaggle.json`.
+| Task | Metric | Score |
+|---|---|---|
+| Binary **Mpox screening** | Accuracy / AUC | **98.35% / 99.58%** |
+| 14-class fine-grained diagnosis | Accuracy | **77.23%** |
 
-```bash
-.venv/bin/python -m src.data.download          # pulls MSLD v2 + HAM10000 + ISIC 2019 + symptom CSV
-.venv/bin/python -m src.data.prepare_lesion    # build the 14-class train/val/test split
-.venv/bin/python -m src.data.prepare_symptom   # clean symptom CSV (fixes the 'sum' leakage)
-```
+The 14-class result is on a demanding benchmark: 14 classes, leakage-free split, ~3,000 real
+images, cross-validated. See [`docs/benchmark.md`](docs/benchmark.md) for the full tables,
+ablations, and honest negative results.
 
-The 14-class lesion set is a documented composite (pox diseases + dermoscopy + healthy) — see
-`PROJECT_PLAN.md → Datasets`.
+<div align="center"><img src="assets/confusion_matrix.png" width="520" alt="14-class confusion matrix"></div>
 
-## Pipeline (once data is ready)
+## Install
 
 ```bash
-.venv/bin/python -m src.models.extract_features   # cache frozen-backbone features (.npy)
-.venv/bin/python -m src.models.train_base         # train the 3 classification heads
-.venv/bin/python -m src.models.pso_ensemble       # PSO weight optimization
-.venv/bin/python -m src.eval.run_all              # metrics, confusion, ROC, Kappa, Grad-CAM, ...
-.venv/bin/python -m src.models.symptom_model      # symptom CNN + LR/RF/XGBoost baselines
+git clone https://github.com/Sudharsanselvaraj/Synergistic-Deep-Learning-for-Monkeypox-Diagnosis.git
+cd Synergistic-Deep-Learning-for-Monkeypox-Diagnosis
+python -m venv .venv && source .venv/bin/activate
+pip install -e .              # add ".[metal]" on Apple Silicon, ".[dev]" for tests/linting
 ```
 
-Outputs land in `results/` (figures, tables, models). Nothing paper-facing is hand-typed.
+## Quick start
 
-## Layout
+```bash
+trinet download        # fetch datasets (needs a Kaggle API token)
+trinet prepare         # leakage-free 14-class split + clean symptom data
+trinet features        # cache frozen-backbone features
+trinet train           # train classification heads
+trinet fusion          # fusion-strategy ablation (Concat-MLP is the champion)
+trinet evaluate --champion   # figures + tables from the best model
+```
 
+Run the whole image pipeline at once with `trinet benchmark`. Full CLI: `trinet --help`.
+
+Use the library directly:
+
+```python
+from trinet.models.fusion import build_concat_mlp
+from trinet.evaluation.metrics import compute_scores
 ```
-config.py          central config (paths, 14 class names, hyperparameters)
-src/data/          download + prepare (lesion split, symptom cleaning)
-src/models/        backbones, feature caching, base training, PSO ensemble, symptom model
-src/eval/          metrics, confusion, ROC, Grad-CAM, cross-val, McNemar, Kappa, ablation
-src/interface/     web / demo (Phase 2)
-legacy/            the original published-paper scripts, preserved for reference
-results/           generated figures, tables, trained models
-```
+
+## Documentation
+
+- [`docs/architecture.md`](docs/architecture.md) — models, fusion, pipeline
+- [`docs/datasets.md`](docs/datasets.md) — data sources and the 14-class composition
+- [`docs/benchmark.md`](docs/benchmark.md) — results, ablations, honest findings
+- [`docs/reproducibility.md`](docs/reproducibility.md) — how to reproduce every number
+- [`docs/roadmap.md`](docs/roadmap.md) — project plan and future work
+
+The original published-paper scripts are preserved under [`archive/`](archive/).
+
+## Citation
+
+If you use this work, please cite it — see [`CITATION.cff`](CITATION.cff).
+
+## License
+
+[MIT](LICENSE)
