@@ -8,9 +8,8 @@ and no standard model exceeds ~70% on it — 97.86% is simply not reproducible h
 
 Output: data/processed/symptom.csv  (numeric, target column `MonkeyPox` in {0,1})
 """
+
 from __future__ import annotations
-import sys
-from pathlib import Path
 
 import pandas as pd
 
@@ -29,12 +28,14 @@ def main() -> None:
 
     # one-hot the only categorical column
     if "Systemic Illness" in df.columns:
-        df = pd.concat([df, pd.get_dummies(df["Systemic Illness"], prefix="SystemicIllness")],
-                       axis=1).drop(columns=["Systemic Illness"])
+        df = pd.concat(
+            [df, pd.get_dummies(df["Systemic Illness"], prefix="SystemicIllness")], axis=1
+        ).drop(columns=["Systemic Illness"])
 
     # map booleans / Positive-Negative to {0,1}
-    df = df.replace({True: 1, False: 0, "True": 1, "False": 0,
-                     "Positive": 1, "Negative": 0}).infer_objects(copy=False)
+    df = df.replace(
+        {True: 1, False: 0, "True": 1, "False": 0, "Positive": 1, "Negative": 0}
+    ).infer_objects(copy=False)
     df = df.astype({c: int for c in df.columns if df[c].dtype != object})
 
     # NOTE: deliberately NO 'sum' feature (that was the leakage in the original).
@@ -43,8 +44,10 @@ def main() -> None:
     out = CFG.data_proc / "symptom.csv"
     df.to_csv(out, index=False)
     print(f"[✓] cleaned symptom data -> {out}")
-    print(f"    {df.shape[1]-1} features, {df.shape[0]} rows, "
-          f"class balance: {100*pos:.1f}% positive")
+    print(
+        f"    {df.shape[1] - 1} features, {df.shape[0]} rows, "
+        f"class balance: {100 * pos:.1f}% positive"
+    )
     print("    next: python -m src.models.symptom_model")
 
 

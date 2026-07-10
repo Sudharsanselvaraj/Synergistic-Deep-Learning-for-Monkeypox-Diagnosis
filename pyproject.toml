@@ -54,5 +54,15 @@ where = ["src"]
 line-length = 100
 target-version = "py310"
 
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP"]     # pycodestyle, pyflakes, isort, warnings, pyupgrade
+# E402: import-after-code (needed for the CPU/GPU device guards); E501/E741/E702 are stylistic.
+ignore = ["E402", "E501", "E741", "E702"]
+
+[tool.mypy]
+python_version = "3.10"
+ignore_missing_imports = true
+warn_unused_ignores = true
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]

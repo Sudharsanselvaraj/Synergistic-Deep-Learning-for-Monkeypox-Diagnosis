@@ -3,23 +3,31 @@
 Everything downstream (tables, figures, the paper) reads from these functions so a single
 source of truth produces every reported number.
 """
+
 from __future__ import annotations
-from dataclasses import dataclass, asdict
+
+from dataclasses import asdict, dataclass
 
 import numpy as np
 from sklearn.metrics import (
-    accuracy_score, precision_score, recall_score, f1_score,
-    roc_auc_score, cohen_kappa_score, confusion_matrix, classification_report,
+    accuracy_score,
+    classification_report,
+    cohen_kappa_score,
+    confusion_matrix,
+    f1_score,
+    precision_score,
+    recall_score,
+    roc_auc_score,
 )
 
 
 @dataclass
 class Scores:
     accuracy: float
-    precision: float   # macro
-    recall: float      # macro
-    f1: float          # macro
-    auc: float         # macro one-vs-rest (nan if undefined)
+    precision: float  # macro
+    recall: float  # macro
+    f1: float  # macro
+    auc: float  # macro one-vs-rest (nan if undefined)
     kappa: float
     n: int
 
@@ -30,8 +38,9 @@ class Scores:
         return d
 
 
-def compute_scores(y_true: np.ndarray, y_pred: np.ndarray,
-                   y_prob: np.ndarray | None = None) -> Scores:
+def compute_scores(
+    y_true: np.ndarray, y_pred: np.ndarray, y_prob: np.ndarray | None = None
+) -> Scores:
     """Macro-averaged metrics. y_prob (N, C) enables AUC; pass None to skip."""
     y_true = np.asarray(y_true).ravel()
     y_pred = np.asarray(y_pred).ravel()
@@ -74,11 +83,12 @@ def mcnemar(y_true, pred_a, pred_b) -> tuple[float, float]:
     honest choice here), matching Table 7's intent.
     """
     from scipy.stats import binomtest
+
     y_true = np.asarray(y_true).ravel()
     a_correct = np.asarray(pred_a).ravel() == y_true
     b_correct = np.asarray(pred_b).ravel() == y_true
-    b01 = int(np.sum(a_correct & ~b_correct))   # a right, b wrong
-    b10 = int(np.sum(~a_correct & b_correct))   # a wrong, b right
+    b01 = int(np.sum(a_correct & ~b_correct))  # a right, b wrong
+    b10 = int(np.sum(~a_correct & b_correct))  # a wrong, b right
     n = b01 + b10
     if n == 0:
         return 0.0, 1.0
@@ -87,8 +97,9 @@ def mcnemar(y_true, pred_a, pred_b) -> tuple[float, float]:
     return float(stat), float(p)
 
 
-def bootstrap_ci(values: np.ndarray, n_boot: int = 2000, alpha: float = 0.05,
-                 seed: int = 42) -> tuple[float, float]:
+def bootstrap_ci(
+    values: np.ndarray, n_boot: int = 2000, alpha: float = 0.05, seed: int = 42
+) -> tuple[float, float]:
     """Percentile bootstrap CI for the mean of a metric across samples."""
     rng = np.random.default_rng(seed)
     values = np.asarray(values)

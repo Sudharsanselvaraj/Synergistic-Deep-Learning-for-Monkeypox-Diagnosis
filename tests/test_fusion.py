@@ -4,7 +4,7 @@ import pytest
 from trinet.config import CFG
 from trinet.models.fusion import build_concat_mlp, build_gated_attention, build_transformer
 
-DIMS = [768, 1536, 1920]          # ConvNeXt / InceptionResNetV2 / DenseNet201
+DIMS = [768, 1536, 1920]  # ConvNeXt / InceptionResNetV2 / DenseNet201
 
 
 @pytest.mark.parametrize("build", [build_concat_mlp, build_gated_attention, build_transformer])

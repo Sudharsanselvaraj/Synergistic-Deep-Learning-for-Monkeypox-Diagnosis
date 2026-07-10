@@ -11,20 +11,22 @@ honest equivalents of the paper's figures/tables:
 
 Nothing here is hand-typed; re-run after retraining to refresh every artifact.
 """
-from __future__ import annotations
-import json
-import sys
-from pathlib import Path
 
-import numpy as np
+from __future__ import annotations
+
+import json
+
 import matplotlib
+import numpy as np
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from sklearn.metrics import roc_curve, auc as sk_auc
+from sklearn.metrics import auc as sk_auc
+from sklearn.metrics import roc_curve
 
-from trinet.config import CFG, ensure_dirs                              # noqa: E402
+from trinet.config import CFG, ensure_dirs  # noqa: E402
 from trinet.evaluation.metrics import compute_scores, confusion, mcnemar  # noqa: E402
-from trinet.models.ensemble import ensemble_prob                # noqa: E402
+from trinet.models.ensemble import ensemble_prob  # noqa: E402
 
 plt.rcParams.update({"figure.dpi": 130, "font.size": 9})
 
@@ -49,15 +51,27 @@ def fig_confusion_14(y, ens):
     cm = confusion(y, ens.argmax(1), CFG.n_classes)
     fig, ax = plt.subplots(figsize=(8, 7))
     im = ax.imshow(cm, cmap="viridis")
-    ax.set(xticks=range(CFG.n_classes), yticks=range(CFG.n_classes),
-           xlabel="Predicted", ylabel="True", title="Tri-Net — 14-class confusion (test)")
+    ax.set(
+        xticks=range(CFG.n_classes),
+        yticks=range(CFG.n_classes),
+        xlabel="Predicted",
+        ylabel="True",
+        title="Tri-Net — 14-class confusion (test)",
+    )
     ax.set_xticklabels(CFG.lesion_classes, rotation=90)
     ax.set_yticklabels(CFG.lesion_classes)
     for i in range(CFG.n_classes):
         for j in range(CFG.n_classes):
             if cm[i, j]:
-                ax.text(j, i, cm[i, j], ha="center", va="center",
-                        color="white" if cm[i, j] < cm.max() / 2 else "black", fontsize=7)
+                ax.text(
+                    j,
+                    i,
+                    cm[i, j],
+                    ha="center",
+                    va="center",
+                    color="white" if cm[i, j] < cm.max() / 2 else "black",
+                    fontsize=7,
+                )
     fig.colorbar(im, fraction=0.046)
     fig.tight_layout()
     fig.savefig(CFG.fig_dir / f"confusion_14class{_SUFFIX}.png")
@@ -68,17 +82,33 @@ def fig_confusion_binary(y, ens):
     mpox = CFG.lesion_classes.index(CFG.mpox_class)
     yb = (y == mpox).astype(int)
     pb = (ens.argmax(1) == mpox).astype(int)
-    cm = np.array([[np.sum((yb == 0) & (pb == 0)), np.sum((yb == 0) & (pb == 1))],
-                   [np.sum((yb == 1) & (pb == 0)), np.sum((yb == 1) & (pb == 1))]])
+    cm = np.array(
+        [
+            [np.sum((yb == 0) & (pb == 0)), np.sum((yb == 0) & (pb == 1))],
+            [np.sum((yb == 1) & (pb == 0)), np.sum((yb == 1) & (pb == 1))],
+        ]
+    )
     fig, ax = plt.subplots(figsize=(4, 3.5))
-    im = ax.imshow(cm, cmap="Blues")
-    ax.set(xticks=[0, 1], yticks=[0, 1], xticklabels=["No Mpox", "Mpox"],
-           yticklabels=["No Mpox", "Mpox"], xlabel="Predicted", ylabel="Actual",
-           title="Tri-Net — Mpox vs rest (test)")
+    ax.imshow(cm, cmap="Blues")
+    ax.set(
+        xticks=[0, 1],
+        yticks=[0, 1],
+        xticklabels=["No Mpox", "Mpox"],
+        yticklabels=["No Mpox", "Mpox"],
+        xlabel="Predicted",
+        ylabel="Actual",
+        title="Tri-Net — Mpox vs rest (test)",
+    )
     for i in range(2):
         for j in range(2):
-            ax.text(j, i, cm[i, j], ha="center", va="center",
-                    color="white" if cm[i, j] > cm.max() / 2 else "black")
+            ax.text(
+                j,
+                i,
+                cm[i, j],
+                ha="center",
+                va="center",
+                color="white" if cm[i, j] > cm.max() / 2 else "black",
+            )
     fig.tight_layout()
     fig.savefig(CFG.fig_dir / f"confusion_binary{_SUFFIX}.png")
     plt.close(fig)
@@ -123,7 +153,8 @@ def table_eval(y, base, ens):
     rows.append({"model": "Tri-Net (PSO)", **compute_scores(y, ens.argmax(1), ens).as_pct()})
     cols = ["model", "accuracy", "precision", "recall", "f1", "auc", "kappa", "n"]
     (CFG.tbl_dir / f"evaluation{_SUFFIX}.csv").write_text(
-        "\n".join([",".join(cols)] + [",".join(str(r[c]) for c in cols) for r in rows]))
+        "\n".join([",".join(cols)] + [",".join(str(r[c]) for c in cols) for r in rows])
+    )
     return rows
 
 
@@ -138,11 +169,15 @@ def table_mcnemar(y, base, ens):
 
 def main() -> None:
     import argparse
+
     global _SUFFIX
     ap = argparse.ArgumentParser()
     ap.add_argument("--tag", default="", help="prob-file tag, e.g. 'ft' for fine-tuned models")
-    ap.add_argument("--champion", action="store_true",
-                    help="use the best learned fusion model (Concat+MLP) as the headline ensemble")
+    ap.add_argument(
+        "--champion",
+        action="store_true",
+        help="use the best learned fusion model (Concat+MLP) as the headline ensemble",
+    )
     args = ap.parse_args()
     tag = args.tag
     _SUFFIX = "_champion" if args.champion else (f"_{tag}" if tag else "")
@@ -154,11 +189,15 @@ def main() -> None:
     fig_kappa(y, base, ens)
     rows = table_eval(y, base, ens)
     table_mcnemar(y, base, ens)
-    print("Ensemble:", "Concat+MLP fusion (champion)" if w is None
-          else f"weights {np.round(w, 3).tolist()}")
+    print(
+        "Ensemble:",
+        "Concat+MLP fusion (champion)" if w is None else f"weights {np.round(w, 3).tolist()}",
+    )
     for r in rows:
-        print(f"  {r['model']:<22} acc={r['accuracy']:>6} f1={r['f1']:>6} "
-              f"auc={r['auc']:>6} kappa={r['kappa']:>6}")
+        print(
+            f"  {r['model']:<22} acc={r['accuracy']:>6} f1={r['f1']:>6} "
+            f"auc={r['auc']:>6} kappa={r['kappa']:>6}"
+        )
     print(f"\n[✓] figures -> {CFG.fig_dir}\n[✓] tables  -> {CFG.tbl_dir}")
 
 

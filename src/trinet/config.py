@@ -3,7 +3,9 @@
 Everything paths, class names, and hyperparameters live here so scripts stay thin and
 the whole pipeline is reproducible. Import as `from trinet.config import CFG`.
 """
+
 from __future__ import annotations
+
 from pathlib import Path
 
 # repo root is three levels up from src/trinet/config.py
@@ -14,23 +16,33 @@ class CFG:
     # ---- paths ----
     root = ROOT
     data_raw = ROOT / "data" / "raw"
-    data_proc = ROOT / "data" / "processed"      # train/ val/ test/ class-folders
-    features = ROOT / "data" / "features"         # cached backbone features (.npy)
-    outputs = ROOT / "outputs"                    # generated artifacts (git-ignored)
+    data_proc = ROOT / "data" / "processed"  # train/ val/ test/ class-folders
+    features = ROOT / "data" / "features"  # cached backbone features (.npy)
+    outputs = ROOT / "outputs"  # generated artifacts (git-ignored)
     fig_dir = outputs / "figures"
     tbl_dir = outputs / "reports"
     model_dir = outputs / "checkpoints"
     pred_dir = outputs / "predictions"
     log_dir = outputs / "logs"
-    results = outputs                             # backwards-compat alias
+    results = outputs  # backwards-compat alias
 
     # ---- image lesion module ----
     # 14 classes, matching Fig. 3 of the paper. Order is fixed for reproducibility.
     lesion_classes = [
-        "Mpox", "Chickenpox", "Cowpox", "Measles", "HFMD", "Healthy",       # infectious / pox
-        "Melanoma", "MelanocyticNevi", "BasalCellCarcinoma",                 # dermoscopy (skin cancer)
-        "ActinicKeratosis", "BenignKeratosis", "Dermatofibroma",
-        "VascularLesion", "SquamousCellCarcinoma",
+        "Mpox",
+        "Chickenpox",
+        "Cowpox",
+        "Measles",
+        "HFMD",
+        "Healthy",  # infectious / pox
+        "Melanoma",
+        "MelanocyticNevi",
+        "BasalCellCarcinoma",  # dermoscopy (skin cancer)
+        "ActinicKeratosis",
+        "BenignKeratosis",
+        "Dermatofibroma",
+        "VascularLesion",
+        "SquamousCellCarcinoma",
     ]
     n_classes = len(lesion_classes)
     # The one positive class for the binary Mpox-vs-rest collapse used in Fig. 6.
@@ -62,16 +74,16 @@ class CFG:
     early_stop_patience = 8
 
     # fine-tuning (phase 2)
-    finetune_epochs = 15          # early stopping keeps best; small data overfits fast
+    finetune_epochs = 15  # early stopping keeps best; small data overfits fast
     finetune_lr = 1e-5
-    finetune_unfreeze = 60        # last N backbone layers unfrozen
+    finetune_unfreeze = 60  # last N backbone layers unfrozen
 
     # ---- PSO ensemble ----
     pso_particles = 20
     pso_iters = 100
-    pso_w = 0.7        # inertia
-    pso_c1 = 1.5       # cognitive
-    pso_c2 = 1.5       # social
+    pso_w = 0.7  # inertia
+    pso_c1 = 1.5  # cognitive
+    pso_c2 = 1.5  # social
 
     # ---- symptom module ----
     symptom_csv = data_raw / "symptom" / "DATA.csv"
@@ -82,8 +94,17 @@ class CFG:
 
 
 def ensure_dirs() -> None:
-    for p in [CFG.data_raw, CFG.data_proc, CFG.features, CFG.outputs,
-              CFG.fig_dir, CFG.tbl_dir, CFG.model_dir, CFG.pred_dir, CFG.log_dir]:
+    for p in [
+        CFG.data_raw,
+        CFG.data_proc,
+        CFG.features,
+        CFG.outputs,
+        CFG.fig_dir,
+        CFG.tbl_dir,
+        CFG.model_dir,
+        CFG.pred_dir,
+        CFG.log_dir,
+    ]:
         p.mkdir(parents=True, exist_ok=True)
 
 

@@ -7,7 +7,9 @@ and specificity are reported alongside.
 
     python experiments/binary_screening.py
 """
+
 from __future__ import annotations
+
 import sys
 from pathlib import Path
 
@@ -50,20 +52,28 @@ def main() -> None:
 
     print("Binary Mpox-vs-rest screening (champion Concat+MLP)")
     print(f"  confusion: TP={tp} FN={fn} TN={tn} FP={fp}  (n={n})")
-    print(f"  accuracy    : {100*acc:5.2f}%   95% CI {_wilson(tp+tn, n)[0]:.2f}-{_wilson(tp+tn, n)[1]:.2f}")
-    print(f"  sensitivity : {100*sens:5.2f}%   95% CI {_wilson(tp, tp+fn)[0]:.2f}-{_wilson(tp, tp+fn)[1]:.2f}")
-    print(f"  specificity : {100*spec:5.2f}%   95% CI {_wilson(tn, tn+fp)[0]:.2f}-{_wilson(tn, tn+fp)[1]:.2f}")
-    print(f"  precision   : {100*prec:5.2f}%")
-    print(f"  AUC         : {100*auc:5.2f}%")
+    print(
+        f"  accuracy    : {100 * acc:5.2f}%   95% CI {_wilson(tp + tn, n)[0]:.2f}-{_wilson(tp + tn, n)[1]:.2f}"
+    )
+    print(
+        f"  sensitivity : {100 * sens:5.2f}%   95% CI {_wilson(tp, tp + fn)[0]:.2f}-{_wilson(tp, tp + fn)[1]:.2f}"
+    )
+    print(
+        f"  specificity : {100 * spec:5.2f}%   95% CI {_wilson(tn, tn + fp)[0]:.2f}-{_wilson(tn, tn + fp)[1]:.2f}"
+    )
+    print(f"  precision   : {100 * prec:5.2f}%")
+    print(f"  AUC         : {100 * auc:5.2f}%")
 
-    lines = ["metric,value,ci_low,ci_high",
-             f"accuracy,{100*acc:.2f},{_wilson(tp+tn, n)[0]:.2f},{_wilson(tp+tn, n)[1]:.2f}",
-             f"sensitivity,{100*sens:.2f},{_wilson(tp, tp+fn)[0]:.2f},{_wilson(tp, tp+fn)[1]:.2f}",
-             f"specificity,{100*spec:.2f},{_wilson(tn, tn+fp)[0]:.2f},{_wilson(tn, tn+fp)[1]:.2f}",
-             f"precision,{100*prec:.2f},,",
-             f"auc,{100*auc:.2f},,"]
+    lines = [
+        "metric,value,ci_low,ci_high",
+        f"accuracy,{100 * acc:.2f},{_wilson(tp + tn, n)[0]:.2f},{_wilson(tp + tn, n)[1]:.2f}",
+        f"sensitivity,{100 * sens:.2f},{_wilson(tp, tp + fn)[0]:.2f},{_wilson(tp, tp + fn)[1]:.2f}",
+        f"specificity,{100 * spec:.2f},{_wilson(tn, tn + fp)[0]:.2f},{_wilson(tn, tn + fp)[1]:.2f}",
+        f"precision,{100 * prec:.2f},,",
+        f"auc,{100 * auc:.2f},,",
+    ]
     (CFG.tbl_dir / "binary_screening.csv").write_text("\n".join(lines))
-    print(f"\n[/] wrote {CFG.tbl_dir/'binary_screening.csv'}")
+    print(f"\n[/] wrote {CFG.tbl_dir / 'binary_screening.csv'}")
 
 
 if __name__ == "__main__":

@@ -1,5 +1,6 @@
 import numpy as np
-from trinet.evaluation.metrics import compute_scores, mcnemar, bootstrap_ci
+
+from trinet.evaluation.metrics import bootstrap_ci, compute_scores, mcnemar
 
 
 def test_perfect_prediction():
@@ -21,8 +22,8 @@ def test_partial_prediction():
 
 def test_mcnemar_symmetry():
     y = np.array([0, 1, 0, 1, 0, 1])
-    a = np.array([0, 1, 0, 1, 0, 1])   # all correct
-    b = np.array([1, 1, 1, 1, 1, 1])   # some wrong
+    a = np.array([0, 1, 0, 1, 0, 1])  # all correct
+    b = np.array([1, 1, 1, 1, 1, 1])  # some wrong
     stat, p = mcnemar(y, a, b)
     assert 0.0 <= p <= 1.0
     assert stat >= 0.0
