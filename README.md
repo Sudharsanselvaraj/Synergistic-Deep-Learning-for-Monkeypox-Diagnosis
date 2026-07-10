@@ -4,6 +4,8 @@
 
 **A reproducible deep-learning framework for Mpox skin-lesion diagnosis**
 
+[![tests](https://github.com/Sudharsanselvaraj/Synergistic-Deep-Learning-for-Monkeypox-Diagnosis/actions/workflows/tests.yml/badge.svg)](https://github.com/Sudharsanselvaraj/Synergistic-Deep-Learning-for-Monkeypox-Diagnosis/actions/workflows/tests.yml)
+[![lint](https://github.com/Sudharsanselvaraj/Synergistic-Deep-Learning-for-Monkeypox-Diagnosis/actions/workflows/lint.yml/badge.svg)](https://github.com/Sudharsanselvaraj/Synergistic-Deep-Learning-for-Monkeypox-Diagnosis/actions/workflows/lint.yml)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
 [![TensorFlow](https://img.shields.io/badge/TensorFlow-2.16-orange)](https://www.tensorflow.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -15,6 +17,10 @@ Tri-Net v2 is an honest, leakage-free rebuild of the *Tri-Net* Mpox-diagnosis wo
 modern CNN backbones with **learned feature fusion** and a rigorous evaluation suite, and it
 reports two clearly-separated tasks: **14-class fine-grained diagnosis** and **binary Mpox
 screening**.
+
+> Official reproducible implementation of *"Tri-Net: Unified Deep Learning for Skin Lesion and
+> Symptom-Based Monkeypox Detection"*, rebuilt as **Tri-Net v2** — a research framework rather
+> than one-off paper code. The original implementation is preserved under [`archive/`](archive/).
 
 ## Results
 
@@ -58,9 +64,22 @@ from trinet.models.fusion import build_concat_mlp
 from trinet.evaluation.metrics import compute_scores
 ```
 
+## Model Zoo
+
+| Model | Task | Accuracy | AUC | Weights |
+|---|---|---:|---:|:--:|
+| **Tri-Net v2 (Concat-MLP fusion)** | 14-class | **77.2** | 97.0 | ✅ |
+| ConvNeXt-Tiny | 14-class | 69.3 | 96.5 | ✅ |
+| **Tri-Net v2 (Mpox screening)** | binary | **98.4** | **99.6** | ✅ |
+
+Full table in [`docs/model_zoo.md`](docs/model_zoo.md); weights on the
+[Releases](https://github.com/Sudharsanselvaraj/Synergistic-Deep-Learning-for-Monkeypox-Diagnosis/releases) page.
+Then run inference directly: `trinet predict lesion.jpg`.
+
 ## Documentation
 
 - [`docs/architecture.md`](docs/architecture.md) — models, fusion, pipeline
+- [`docs/model_zoo.md`](docs/model_zoo.md) — pretrained models + weights
 - [`docs/datasets.md`](docs/datasets.md) — data sources and the 14-class composition
 - [`docs/benchmark.md`](docs/benchmark.md) — results, ablations, honest findings
 - [`docs/reproducibility.md`](docs/reproducibility.md) — how to reproduce every number
