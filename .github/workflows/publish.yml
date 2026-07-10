@@ -1,12 +1,13 @@
 name: publish
 
-# Publishes Mpox-Trinet to PyPI when a GitHub Release is published.
-# Uses PyPI Trusted Publishing (OIDC) — no API token needed once the trusted
-# publisher is configured at pypi.org (Project → Publishing → add this repo/workflow).
+# Publishes Mpox-Trinet to PyPI. MANUAL trigger (Actions → publish → Run workflow) so it never
+# fails automatically before Trusted Publishing is configured. Uses PyPI Trusted Publishing
+# (OIDC) — no API token once the trusted publisher is set up at pypi.org (Project → Publishing
+# → add this repo + workflow `publish.yml` + environment `pypi`). `skip-existing` makes re-runs
+# safe when a version is already on PyPI.
 
 on:
-  release:
-    types: [published]
+  workflow_dispatch:
 
 jobs:
   pypi:
@@ -25,3 +26,5 @@ jobs:
           python -m build
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          skip-existing: true

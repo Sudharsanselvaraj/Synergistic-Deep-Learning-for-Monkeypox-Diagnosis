@@ -14,8 +14,8 @@ jobs:
         with:
           python-version: "3.11"
           cache: pip
-      - run: pip install ruff
+      - run: pip install ruff==0.15.21      # pin so CI matches local formatting rules
       - name: Lint
-        run: ruff check src tests experiments
+        run: ruff check src tests experiments examples
       - name: Format check
-        run: ruff format --check src tests experiments
+        run: ruff format --check src tests experiments examples
