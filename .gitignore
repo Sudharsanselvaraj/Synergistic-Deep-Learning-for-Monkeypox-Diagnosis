@@ -23,3 +23,6 @@ kaggle.json
 # OS / misc
 .DS_Store
 report.log
+
+# editor
+.vscode/
