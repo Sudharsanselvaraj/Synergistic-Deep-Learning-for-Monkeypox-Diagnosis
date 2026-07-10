@@ -1,5 +1,0 @@
-pair,disagreement,Q,rho,double_fault
-EfficientNetB4|InceptionResNetV2,0.2937,0.6953,0.3827,0.2211
-EfficientNetB4|DenseNet201,0.33,0.5812,0.3058,0.2112
-InceptionResNetV2|DenseNet201,0.2475,0.7605,0.4393,0.2046
-MEAN,0.2904,0.679,0.3759,0.2123

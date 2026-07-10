@@ -1,5 +1,0 @@
-model,accuracy,precision,recall,f1,auc,kappa,n
-EfficientNetB4,58.42,65.43,67.19,63.34,94.95,54.18,303
-InceptionResNetV2,67.99,68.54,70.53,68.83,96.24,64.38,303
-DenseNet201,66.34,67.47,70.01,67.16,95.64,62.78,303
-Tri-Net (PSO),71.62,73.85,77.27,74.34,96.82,68.58,303

@@ -1,5 +1,0 @@
-pair,disagreement,Q,rho,double_fault
-ConvNeXtTiny|InceptionResNetV2,0.264,0.7054,0.3869,0.1815
-ConvNeXtTiny|DenseNet201,0.2343,0.7895,0.4648,0.2046
-InceptionResNetV2|DenseNet201,0.2475,0.7605,0.4393,0.2046
-MEAN,0.2486,0.7518,0.4303,0.1969
