@@ -278,11 +278,15 @@ def main() -> None:
         if diff < 1e-5:
             np.save(CFG.model_dir / "prob_test_fusion.npy", prob)
             deployed = strategy
-            print(f"[checkpoint] deployed={deployed}  acc={acc:.2f}  "
-                  f"cross-process max|Δlogit|={diff:.2e}  [OK]")
+            print(
+                f"[checkpoint] deployed={deployed}  acc={acc:.2f}  "
+                f"cross-process max|Δlogit|={diff:.2e}  [OK]"
+            )
             break
-        print(f"[checkpoint] {strategy} FAILED cross-process reload "
-              f"(max|Δlogit|={diff:.2e}); trying next best")
+        print(
+            f"[checkpoint] {strategy} FAILED cross-process reload "
+            f"(max|Δlogit|={diff:.2e}); trying next best"
+        )
     if deployed is None:
         raise RuntimeError("No ensemble reproduced faithfully cross-process.")
 
