@@ -22,6 +22,7 @@ Usage:
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 import numpy as np
 import tensorflow as tf
@@ -161,8 +162,39 @@ def _row(name, learnable, params, yte, prob):
     return {"strategy": name, "learnable": learnable, "params": params, **s.as_pct()}
 
 
+def _verify_crossprocess(prob_ref) -> float:
+    """Reload the saved checkpoint in a FRESH subprocess and return max|Δlogit| vs prob_ref.
+
+    A true cross-process check — the only reliable way to catch non-deterministic Keras
+    deserialization that an in-process reload misses.
+    """
+    import subprocess
+    import sys
+    import tempfile
+
+    out = Path(tempfile.mkdtemp()) / "reload.npy"
+    script = (
+        "import numpy as np, sys; import tensorflow as tf; "
+        "tf.config.set_visible_devices([], 'GPU'); "
+        "from trinet.models.fusion import load_fusion; from trinet.config import CFG; "
+        "m, bbs = load_fusion(); "
+        "X = [np.load(CFG.features / f'X_test_{b}.npy') for b in bbs]; "
+        "np.save(sys.argv[1], m.predict(X, verbose=0))"
+    )
+    subprocess.run([sys.executable, "-c", script, str(out)], check=True, cwd=CFG.root)
+    return float(np.abs(prob_ref - np.load(out)).max())
+
+
 def main() -> None:
     import argparse
+
+    # Train fusion on CPU so the saved checkpoint is numerically identical to how it is loaded
+    # for inference (predict runs on CPU). A GPU(Metal)-trained model reloaded on CPU can
+    # diverge enough to flip predictions. Fusion heads are tiny, so CPU training is fast.
+    try:
+        tf.config.set_visible_devices([], "GPU")
+    except RuntimeError:
+        pass  # GPU already initialised; op placement will still fall back gracefully
 
     ap = argparse.ArgumentParser()
     ap.add_argument("--backbones", nargs="*", default=CFG.backbones)
@@ -193,36 +225,38 @@ def main() -> None:
         ("GatedAttention", build_gated_attention),
         ("Transformer", build_transformer),
     ]
-    best_acc, best_model, best_name = -1.0, None, None
+    models = {}
     for name, build in builders:
         model = _train(build(dims), Xtr, ytr, Xva, yva, epochs)
         prob = model.predict(Xte, verbose=0)
-        r = _row(name, "yes", model.count_params(), yte, prob)
-        rows.append(r)
-        if r["accuracy"] > best_acc:
-            best_acc, best_model, best_name = r["accuracy"], model, name
+        rows.append(_row(name, "yes", model.count_params(), yte, prob))
+        models[name] = model
 
-    if best_model is not None:
-        prob_best = best_model.predict(Xte, verbose=0)
-        best_model.save(CFG.model_dir / "fusion.keras")
+    # Deploy the highest-accuracy learned model that reproduces its logits in a FRESH PROCESS.
+    # (In-process reload can look perfect while cross-process silently degrades — some Keras 3
+    # layers deserialize non-deterministically. We therefore verify in a real subprocess and
+    # skip any model that fails, keeping the best faithful checkpoint.)
+    ranked = sorted((r for r in rows if r["learnable"] == "yes"), key=lambda r: -r["accuracy"])
+    deployed = None
+    for r in ranked:
+        model = models[r["strategy"]]
+        prob = model.predict(Xte, verbose=0)
+        model.save(CFG.model_dir / "fusion.keras")
         (CFG.model_dir / "fusion_meta.json").write_text(
-            json.dumps({"strategy": best_name, "backbones": bbs, "test_accuracy": best_acc})
+            json.dumps({"strategy": r["strategy"], "backbones": bbs,
+                        "test_accuracy": r["accuracy"]})
         )
-        # STRICT checkpoint verification: the reloaded model must reproduce the champion's
-        # LOGITS, not just its accuracy (accuracy can coincidentally match a broken reload).
-        reloaded, _ = load_fusion(bbs)
-        prob_reload = reloaded.predict(Xte, verbose=0)
-        max_diff = float(np.abs(prob_best - prob_reload).max())
-        if max_diff > 1e-5:
-            raise RuntimeError(
-                f"Checkpoint verification FAILED: reloaded logits differ by {max_diff:.2e} "
-                f"(> 1e-5). Refusing to save a checkpoint that does not reload faithfully."
-            )
-        np.save(CFG.model_dir / "prob_test_fusion.npy", prob_best)
-        print(
-            f"[checkpoint] champion={best_name}  acc={best_acc:.2f}  "
-            f"reload max|Δlogit|={max_diff:.2e}  [OK]"
-        )
+        diff = _verify_crossprocess(prob)
+        if diff < 1e-5:
+            np.save(CFG.model_dir / "prob_test_fusion.npy", prob)
+            deployed = r["strategy"]
+            print(f"[checkpoint] deployed={deployed}  acc={r['accuracy']:.2f}  "
+                  f"cross-process max|Δlogit|={diff:.2e}  [OK]")
+            break
+        print(f"[checkpoint] {r['strategy']} FAILED cross-process reload "
+              f"(max|Δlogit|={diff:.2e}); trying next best")
+    if deployed is None:
+        raise RuntimeError("No fusion model reproduced faithfully cross-process.")
 
     cols = [
         "strategy",
