@@ -18,8 +18,7 @@ import tensorflow as tf
 from tensorflow.keras import layers, Model
 from tensorflow.keras import applications as apps
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from config import CFG  # noqa: E402
+from trinet.config import CFG  # noqa: E402
 
 # name -> (application_ctor, preprocess_input, pooled_feature_dim)
 _SPEC = {

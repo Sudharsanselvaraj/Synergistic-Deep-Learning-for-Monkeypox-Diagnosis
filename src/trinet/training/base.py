@@ -17,10 +17,9 @@ import numpy as np
 import tensorflow as tf
 from sklearn.utils import class_weight as cw
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from config import CFG, ensure_dirs                         # noqa: E402
-from src.models.backbones import build_head, feature_dim    # noqa: E402
-from src.eval.metrics import compute_scores                 # noqa: E402
+from trinet.config import CFG, ensure_dirs                         # noqa: E402
+from trinet.models.backbones import build_head, feature_dim    # noqa: E402
+from trinet.evaluation.metrics import compute_scores                 # noqa: E402
 
 
 def _load(bb: str):
