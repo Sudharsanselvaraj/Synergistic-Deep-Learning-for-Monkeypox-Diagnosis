@@ -138,21 +138,35 @@ _BUILDERS = {
 }
 
 
-def load_fusion(bbs=None):
-    """Load the champion via full-model .keras deserialization.
+class _MeanEnsemble:
+    """Equal-weight probability average over the per-backbone heads — a deployable 'model'.
 
-    We save the whole model (`fusion.keras`), so loading reconstructs the exact architecture,
-    layer names, and weights — no rebuild-from-code. This avoids the cross-process weight
-    misalignment that name/position-based weight loading suffers when the champion was built
-    amid other models. Verified to reproduce the champion's logits (see the save-time check).
+    Takes the same list-of-feature-arrays input as the learned fusion models and returns the
+    mean of each head's softmax, so it drops into the inference path unchanged.
+    """
+
+    def __init__(self, heads):
+        self._heads = heads
+
+    def predict(self, feats, verbose=0):
+        probs = [h.predict(f, verbose=verbose) for h, f in zip(self._heads, feats)]
+        return sum(probs) / len(probs)
+
+
+def load_fusion(bbs=None):
+    """Load the deployed ensemble. Reconstructs the exact model from disk (no rebuild-from-code),
+    so predictions are identical across processes.
+
+    - ``Mean``: loads the per-backbone heads and averages their probabilities.
+    - learned fusion: loads the full ``fusion.keras`` model.
     """
     from tensorflow.keras.models import load_model
 
     meta = json.loads((CFG.model_dir / "fusion_meta.json").read_text())
     bbs = bbs or meta["backbones"]
-    # Full-model .keras reconstructs the exact architecture + weights (no rebuild, so it is
-    # immune to layer-name/weight-order differences across processes). safe_mode=False allows
-    # the Lambda layers used by the attention/transformer variants.
+    if meta["strategy"] == "Mean":
+        heads = [load_model(CFG.model_dir / f"head_{bb}.keras") for bb in bbs]
+        return _MeanEnsemble(heads), bbs
     model = load_model(CFG.model_dir / "fusion.keras", safe_mode=False, compile=False)
     return model, bbs
 
@@ -195,6 +209,9 @@ def main() -> None:
         tf.config.set_visible_devices([], "GPU")
     except RuntimeError:
         pass  # GPU already initialised; op placement will still fall back gracefully
+    # deterministic training so the reported fusion result reproduces exactly across runs
+    tf.keras.utils.set_random_seed(CFG.seed)
+    tf.config.experimental.enable_op_determinism()
 
     ap = argparse.ArgumentParser()
     ap.add_argument("--backbones", nargs="*", default=CFG.backbones)
@@ -210,6 +227,7 @@ def main() -> None:
     rows = []
 
     # analytic baselines on probabilities (need per-backbone probs to exist)
+    ptest = None
     try:
         ptest = _probs(bbs, "test")
         rows.append(_row("Mean", "no", 0, yte, sum(ptest) / len(ptest)))
@@ -232,31 +250,41 @@ def main() -> None:
         rows.append(_row(name, "yes", model.count_params(), yte, prob))
         models[name] = model
 
-    # Deploy the highest-accuracy learned model that reproduces its logits in a FRESH PROCESS.
-    # (In-process reload can look perfect while cross-process silently degrades — some Keras 3
-    # layers deserialize non-deterministically. We therefore verify in a real subprocess and
-    # skip any model that fails, keeping the best faithful checkpoint.)
-    ranked = sorted((r for r in rows if r["learnable"] == "yes"), key=lambda r: -r["accuracy"])
+    # Deploy the highest-accuracy ensemble that reproduces its logits in a FRESH PROCESS.
+    # Candidates: the Mean ensemble (uses the saved per-backbone heads) and each learned fusion
+    # model. In-process reload can look perfect while cross-process silently degrades, so we
+    # verify in a real subprocess and skip any candidate that fails, keeping the best faithful one.
+    acc_of = {r["strategy"]: r["accuracy"] for r in rows}
+    candidates = []  # (accuracy, strategy, model_or_None, prob)
+    heads_present = ptest is not None and all(
+        (CFG.model_dir / f"head_{bb}.keras").exists() for bb in bbs
+    )
+    if heads_present:
+        candidates.append((acc_of["Mean"], "Mean", None, sum(ptest) / len(ptest)))
+    for name, model in models.items():
+        candidates.append((acc_of[name], name, model, model.predict(Xte, verbose=0)))
+    candidates.sort(key=lambda c: -c[0])
+
     deployed = None
-    for r in ranked:
-        model = models[r["strategy"]]
-        prob = model.predict(Xte, verbose=0)
-        model.save(CFG.model_dir / "fusion.keras")
+    for acc, strategy, model, prob in candidates:
+        if strategy == "Mean":
+            (CFG.model_dir / "fusion.keras").unlink(missing_ok=True)  # Mean uses the heads
+        else:
+            model.save(CFG.model_dir / "fusion.keras")
         (CFG.model_dir / "fusion_meta.json").write_text(
-            json.dumps({"strategy": r["strategy"], "backbones": bbs,
-                        "test_accuracy": r["accuracy"]})
+            json.dumps({"strategy": strategy, "backbones": bbs, "test_accuracy": acc})
         )
         diff = _verify_crossprocess(prob)
         if diff < 1e-5:
             np.save(CFG.model_dir / "prob_test_fusion.npy", prob)
-            deployed = r["strategy"]
-            print(f"[checkpoint] deployed={deployed}  acc={r['accuracy']:.2f}  "
+            deployed = strategy
+            print(f"[checkpoint] deployed={deployed}  acc={acc:.2f}  "
                   f"cross-process max|Δlogit|={diff:.2e}  [OK]")
             break
-        print(f"[checkpoint] {r['strategy']} FAILED cross-process reload "
+        print(f"[checkpoint] {strategy} FAILED cross-process reload "
               f"(max|Δlogit|={diff:.2e}); trying next best")
     if deployed is None:
-        raise RuntimeError("No fusion model reproduced faithfully cross-process.")
+        raise RuntimeError("No ensemble reproduced faithfully cross-process.")
 
     cols = [
         "strategy",
