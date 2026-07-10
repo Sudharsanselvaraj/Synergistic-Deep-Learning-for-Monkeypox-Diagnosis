@@ -18,10 +18,12 @@ re-engineered as an installable, tested, and reproducible framework and modernis
 `trinet-v0.9.0-weights.zip` contains the deployed ensemble checkpoint. To run inference:
 
 ```bash
-pip install -e .
+pip install mpox-trinet          # or `pip install -e .` from a clone
 # download and unzip trinet-v0.9.0-weights.zip into outputs/checkpoints/
 trinet predict lesion.jpg
 ```
+
+The package installs as **`mpox-trinet`** and imports as **`trinet`** (with the `trinet` CLI).
 
 The attached checkpoint's exact accuracy is recorded in its `fusion_meta.json`; the full
 benchmark (best configuration 77.2%) is in [`docs/benchmark.md`](benchmark.md). Backbone weights

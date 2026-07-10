@@ -1,0 +1,27 @@
+name: publish
+
+# Publishes Mpox-Trinet to PyPI when a GitHub Release is published.
+# Uses PyPI Trusted Publishing (OIDC) — no API token needed once the trusted
+# publisher is configured at pypi.org (Project → Publishing → add this repo/workflow).
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  pypi:
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write        # required for trusted publishing
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Build sdist + wheel
+        run: |
+          python -m pip install --upgrade pip build
+          python -m build
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
