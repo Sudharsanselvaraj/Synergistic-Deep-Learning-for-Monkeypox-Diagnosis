@@ -1,8 +1,10 @@
 <div align="center">
 
-# 🩺 Tri-Net v2
+<img src="assets/mpox_logo.png" width="460" alt="MPOX">
 
-### A reproducible deep-learning framework for Mpox skin-lesion diagnosis
+# Tri-Net v2
+
+### A Reproducible Deep-Learning Framework for Multi-Class Skin-Lesion and Symptom-Based Monkeypox (Mpox) Diagnosis
 
 *We took a published paper's claims, tried to reproduce them, found the code didn't back them up — and rebuilt the whole thing honestly.*
 
@@ -15,7 +17,7 @@
 [![Code style: ruff](https://img.shields.io/badge/lint-ruff-purple)](https://github.com/astral-sh/ruff)
 [![Reproducible](https://img.shields.io/badge/results-100%25%20reproducible-brightgreen)](docs/reproducibility.md)
 
-**[Results](#-results) • [Quick Start](#-quick-start) • [Model Zoo](#-model-zoo) • [Architecture](#-architecture) • [The Paper Audit](#-the-paper-vs-code-audit) • [Docs](#-documentation) • [Citation](#-citation)**
+**[Abstract](#abstract) • [Results](#-results) • [Quick Start](#-quick-start) • [Model Zoo](#-model-zoo) • [Architecture](#-architecture) • [The Paper Audit](#-the-paper-vs-code-audit) • [Docs](#-documentation) • [Citation](#-citation)**
 
 </div>
 
@@ -27,6 +29,29 @@
 </div>
 
 <br>
+
+---
+
+## Abstract
+
+The 2022–2024 re-emergence of Monkeypox (Mpox) renewed interest in rapid, non-invasive
+computer-aided diagnosis. Many published deep-learning studies report 95–99% accuracy, yet
+these figures are frequently obtained on binary or low-cardinality tasks, on small curated test
+sets, or under pipelines that permit **augmentation leakage** — inflating results and
+undermining reproducibility. **Tri-Net v2** is an honest, end-to-end rebuild of the original
+*Tri-Net* work as an installable, tested, and fully reproducible framework. It evaluates a
+challenging **14-class** dermatological setting under a strictly **leakage-free**
+train/validation/test split, benchmarks four modern convolutional backbones as frozen feature
+extractors, and studies five **fusion** strategies (mean, PSO-weighted, concatenation-MLP,
+gated attention, transformer encoder). The best configuration attains **77.2% top-1 accuracy**
+and **97.0% macro-AUC** on the 14-class task, while a collapsed **binary Mpox-vs-rest** screening
+formulation reaches **98.4% accuracy** and **99.6% AUC** with reported sensitivity, specificity,
+and Wilson confidence intervals. Beyond headline metrics, the framework contributes rigorously
+documented **negative/nuanced results**, an ensemble **diversity analysis**, and a
+**checkpoint-integrity protocol** that verifies serialized models reproduce identical logits
+across processes. Every figure and number is regenerated from code — nothing is hand-typed.
+
+---
 
 ## Why this repo exists
 
@@ -44,6 +69,17 @@ When we sat down to reproduce the paper's headline numbers, the implementation d
 Section 4 of the paper also contains a paragraph copy-pasted from an unrelated routing paper, and its two reported confusion matrices contradict each other.
 
 **Tri-Net v2 is the honest rebuild.** Every number below is produced by runnable code on a leakage-free split — nothing here is hand-typed. Where the original claims didn't hold up, we say so and report what actually happens. See the [full audit](#-the-paper-vs-code-audit) below.
+
+<br>
+
+## Key Contributions
+
+1. **A reproducible 14-class Mpox benchmark** assembled from public sources with a documented, leakage-free 80/10/10 split (2,426 / 303 / 303 unique images).
+2. **A modern-backbone comparison** (EfficientNetB4, InceptionResNetV2, DenseNet201, ConvNeXt-Tiny) under an identical frozen-feature transfer-learning protocol.
+3. **A five-way fusion ablation** contrasting probability-level fusion (mean, PSO) with learned feature-level fusion (concat-MLP, gated attention, transformer encoder).
+4. **A dual-task evaluation** — fine-grained 14-class diagnosis *and* clinically-actionable binary Mpox screening, with sensitivity/specificity and confidence intervals.
+5. **An honest symptom module** whose leakage was removed and whose true (modest) performance is reported instead of an implausible published figure.
+6. **Production-grade engineering** — installable package, unified CLI, unit tests, CI, Docker, model zoo, and a checkpoint-integrity protocol that enforces cross-process logit equivalence.
 
 <br>
 
@@ -72,16 +108,60 @@ Net gain over the reproduced baseline: **+4.63 points**. The ensemble's diversit
 </details>
 
 <details>
+<summary><b>Single-backbone benchmark (frozen features)</b></summary>
+
+<br>
+
+| Backbone | Accuracy | Macro-F1 | AUC | κ |
+|---|---:|---:|---:|---:|
+| EfficientNetB4 | 58.4 | 63.3 | 95.0 | 54.2 |
+| DenseNet201 | 66.3 | 67.2 | 95.6 | 62.8 |
+| InceptionResNetV2 | 68.0 | 68.8 | 96.2 | 64.4 |
+| **ConvNeXt-Tiny** | **69.3** | **70.3** | **96.5** | **65.9** |
+
+</details>
+
+<details>
+<summary><b>Fusion-strategy ablation (best-3 backbones)</b></summary>
+
+<br>
+
+| Strategy | Learnable | Params | Accuracy | Macro-F1 | AUC | κ |
+|---|---|---:|---:|---:|---:|---:|
+| **Concat + MLP** | yes | 2.2 M | **77.2** | **79.1** | 97.0 | **74.6** |
+| Mean | no | 0 | 75.3 | 77.2 | 97.1 | 72.5 |
+| PSO | global | 3 | 73.3 | 74.7 | 96.8 | 70.4 |
+| Transformer | yes | 1.5 M | 65.0 | 68.3 | 96.6 | 61.6 |
+| Gated Attention | yes | 1.2 M | 63.4 | 63.2 | 95.6 | 59.8 |
+
+Feature-level fusion beats probability fusion, but the highest-capacity variants overfit at this dataset size.
+
+</details>
+
+<details>
+<summary><b>Cross-validation, ensemble diversity & per-class</b></summary>
+
+<br>
+
+**5-fold CV** (mean ± SD): EfficientNetB4 59.0 ± 2.6 · InceptionResNetV2 59.2 ± 1.4 · DenseNet201 65.5 ± 0.6 · **Tri-Net 69.3 ± 0.8** (beats every base in all folds).
+
+**Diversity**: pairwise disagreement 24.9%, Yule's Q 0.75, error-correlation ρ 0.43, double-fault 19.7% → variance reduction, oracle ceiling ≈ 80%.
+
+**Per-class split**: pox/infectious classes **89.3%** vs dermoscopy (skin-cancer) classes **73.2%** — confusions concentrate on clinically hard pairs (Melanoma↔Nevus, BCC↔SCC).
+
+</details>
+
+<details>
 <summary><b>Binary screening — full breakdown</b></summary>
 
 <br>
 
-| Metric | Score |
-|---|---:|
-| Accuracy | 98.4% |
-| AUC | 99.6% |
-| Sensitivity | 86.2% |
-| Specificity | 99.6% |
+| Metric | Score | 95% CI (Wilson) |
+|---|---:|---|
+| Accuracy | 98.4% | 96.2 – 99.3 |
+| AUC | 99.6% | — |
+| Sensitivity | 86.2% | 69.4 – 94.5 |
+| Specificity | 99.6% | 98.0 – 99.9 |
 
 The accuracy/AUC pair looks strong, but sensitivity trails specificity by over 13 points — as a screening tool this currently misses a meaningful share of true Mpox cases while rarely false-alarming. Threshold tuning toward sensitivity is an open item; see [`docs/benchmark.md`](docs/benchmark.md).
 
@@ -101,6 +181,43 @@ Full tables, ablations, and honest negative results: **[`docs/benchmark.md`](doc
 - 🩹 **Binary Mpox-screening task**, reported separately from the 14-class task, as a distinct clinical question.
 - 🗣️ **Honest negative results** — fine-tuning doesn't help at this data scale, higher-capacity fusion overfits, and the original symptom-module claim doesn't reproduce. All stated plainly, not buried.
 - 🛠️ **Installable package + CLI** — `trinet train / evaluate / predict / export / explain / doctor`, GitHub Actions CI, Docker, and a Model Zoo with downloadable weights.
+
+<br>
+
+## 🔬 Methodology
+
+**Backbones & transfer learning.** Four ImageNet-pretrained backbones are compared, each with its own required preprocessing. Each *frozen* backbone feeds a lightweight head (Dense→BatchNorm→Dense→Dropout→Softmax); features are cached once so training runs in seconds/epoch. Class imbalance is handled with balanced class weights.
+
+**Fusion strategies.** Five ways to combine backbones on identical features: **Mean** (equal-weight probability average), **PSO** (a global weight vector optimised by Particle Swarm Optimization), **Concat-MLP** (concatenate features → MLP), **Gated Attention** (per-image attention over backbone tokens), and **Transformer** (self-attention encoder).
+
+**Symptom module.** A compact CNN plus Logistic-Regression / Random-Forest / XGBoost baselines; the leaking `sum` feature is removed and its (negligible) effect is quantified by ablation.
+
+**Evaluation protocol.** Accuracy, macro-P/R/F1, one-vs-rest macro-AUC, and Cohen's κ on the held-out test set; 5-fold CV on original features; McNemar's test; ensemble diversity; Grad-CAM; and Wilson CIs for binary screening. Full details: [`docs/architecture.md`](docs/architecture.md).
+
+<br>
+
+## 🏗️ Architecture
+
+```
+datasets ──► features ──► base heads ──► ensemble ─┐
+ (download,   (frozen      (per-backbone   (PSO /   ├─► evaluation
+  prepare)     backbone     classifier)     mean)   │    (metrics, confusion,
+               cache)                               │     ROC, Kappa, McNemar,
+                                    fusion ─────────┘     diversity, Grad-CAM)
+                                 (Concat-MLP / attention / transformer)
+```
+
+Backbones are frozen and cached to disk as feature vectors, so head training runs in seconds per epoch rather than hours.
+
+| Backbone | Pooled dim | Notes |
+|---|---:|---|
+| EfficientNetB4 | 1792 | Metal-compatible |
+| InceptionResNetV2 | 1536 | Metal-compatible |
+| DenseNet201 | 1920 | Metal-compatible |
+| **ConvNeXt-Tiny** | 768 | best single backbone; CPU extraction on Apple Metal |
+| EfficientNetV2-S | 1280 | CPU extraction on Apple Metal |
+
+Five fusion strategies are benchmarked, from trivial to expressive — **feature fusion (Concat-MLP) beats probability fusion (Mean/PSO)**, and the highest-capacity variants (Transformer, gated attention) overfit at this dataset size. Full details: [`docs/architecture.md`](docs/architecture.md).
 
 <br>
 
@@ -143,31 +260,6 @@ print(predict_image("lesion.jpg"))
 from trinet.models.fusion import build_concat_mlp
 from trinet.evaluation.metrics import compute_scores
 ```
-
-<br>
-
-## 🏗️ Architecture
-
-```
-datasets ──► features ──► base heads ──► ensemble ─┐
- (download,   (frozen      (per-backbone   (PSO /   ├─► evaluation
-  prepare)     backbone     classifier)     mean)   │    (metrics, confusion,
-               cache)                               │     ROC, Kappa, McNemar,
-                                    fusion ─────────┘     diversity, Grad-CAM)
-                                 (Concat-MLP / attention / transformer)
-```
-
-Backbones are frozen and cached to disk as feature vectors, so head training runs in seconds per epoch rather than hours.
-
-| Backbone | Pooled dim | Notes |
-|---|---:|---|
-| EfficientNetB4 | 1792 | Metal-compatible |
-| InceptionResNetV2 | 1536 | Metal-compatible |
-| DenseNet201 | 1920 | Metal-compatible |
-| **ConvNeXt-Tiny** | 768 | best single backbone; CPU extraction on Apple Metal |
-| EfficientNetV2-S | 1280 | CPU extraction on Apple Metal |
-
-Five fusion strategies are benchmarked, from trivial to expressive — **feature fusion (Concat-MLP) beats probability fusion (Mean/PSO)**, and the highest-capacity variants (Transformer, gated attention) overfit at this dataset size. Full details: [`docs/architecture.md`](docs/architecture.md).
 
 <br>
 
@@ -242,9 +334,29 @@ Reference environment: Apple M-series, 16 GB, Python 3.11, TensorFlow 2.16.2. No
 ├── docs/                 # documentation site
 ├── docker/               # containerized environment
 ├── archive/              # original paper's unmodified scripts, preserved as-is
-├── tests/                # unit tests (metrics, models, fusion, dataset construction)
+├── tests/                # unit tests (metrics, models, fusion, checkpoint integrity)
 └── assets/               # figures used in docs and README
 ```
+
+<br>
+
+## ⚠️ Limitations
+
+- Public composite datasets limit demographic/acquisition diversity; the test set is modest (303 images), so metrics carry non-trivial confidence intervals.
+- **No external clinical validation** — results are experimental, not clinically certified.
+- Image and symptom modules are trained on **disjoint patient populations**, so genuine multimodal (joint) fusion is not yet possible without a paired dataset.
+- The dermoscopy sub-problem is inherently hard; ~85–90% is near the field-wide ceiling even with far larger datasets and metadata.
+
+> ⚠️ **Research artifact, not a medical device.** Do not use for clinical decision-making without regulatory approval and prospective validation. See [`SECURITY.md`](SECURITY.md).
+
+<br>
+
+## 🗺️ Roadmap
+
+- Complete the backbone table (EfficientNetV2-S) and an efficiency/latency profile.
+- A **hierarchical classifier** (pox-group vs dermoscopy-group → within-group heads), motivated by the 99.7% group-separation result — the most promising route to lift fine-grained accuracy.
+- Larger, higher-resolution dermoscopy data + patient metadata; self-supervised (DINOv2) features.
+- A genuine multimodal model, contingent on a paired image+symptom dataset. See [`docs/roadmap.md`](docs/roadmap.md).
 
 <br>
 
