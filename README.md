@@ -1,42 +1,61 @@
-# Mpox Detector Model
+# Tri-Net MPOX — Monkeypox Detection (rebuild)
 
-## Overview  
-The **Mpox Detector Model** is an advanced diagnostic tool designed to assist in the detection of Monkeypox using two complementary methods:  
-1. **Skin Lesion Classification**: Utilizes cutting-edge pretrained deep learning networks to analyze skin lesion images.  
-2. **Symptom-Based Detection**: Employs a neural network model for symptom analysis based on user-provided inputs.  
+Real, reproducible implementation of the paper *"Tri-Net: Unified Deep Learning for Skin
+Lesion and Symptom-Based Monkeypox Detection."* The published paper's code was a skeleton;
+this repo rebuilds the actual system — a **PSO-optimized 3-backbone ensemble** for 14-class
+skin-lesion classification plus an honest **symptom classifier** — and reproduces every
+figure and table from runnable code. See [`PROJECT_PLAN.md`](PROJECT_PLAN.md) for the full
+plan and the paper-vs-code gap we're closing.
 
-This dual-approach system enhances diagnostic accuracy by combining visual and symptomatic data, providing a reliable, user-friendly solution.
+Runs locally on **Apple Silicon (M-series)** via `tensorflow-metal`.
 
----
+## Setup
 
-## Features  
-- **Tri-Net Architecture**: Combines three powerful pretrained networks—EfficientNetB4, Inception-ResNet V2, and DenseNet201—for precise skin lesion classification.  
-- **Symptom Analysis**: Uses a convolutional neural network (CNN) to predict Monkeypox based on clinical symptoms such as fever, swollen tonsils, and other associated signs.  
-- **User-Friendly Interface**: Accessible via a website for easy prediction using images or symptom inputs.  
-- **Interactive Frontend**: Built with Tkinter for offline usage and integrated with Java Swing for enhanced data management.  
+```bash
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+.venv/bin/python config.py          # create data/ + results/ dirs, sanity-check
+```
 
----
+Verify the Metal GPU is picked up:
+```bash
+.venv/bin/python -c "import tensorflow as tf; print(tf.config.list_physical_devices('GPU'))"
+```
 
-## Technical Details  
+## Data
 
-### Skin Lesion Detector  
-- **Pretrained Models**: EfficientNetB4, Inception-ResNet V2, DenseNet201.  
-- **Input**: Skin lesion images in standard formats.  
-- **Output**: Classification into one of six categories: Monkeypox, Chickenpox, HFMD, Measles, Cowpox, or Healthy.  
+Needs a **Kaggle API token**: kaggle.com → Settings → *Create New API Token* → save as
+`~/.kaggle/kaggle.json`, then `chmod 600 ~/.kaggle/kaggle.json`.
 
-### Symptom Detector  
-- **Neural Network Architecture**:  
-  - Input Layer: 12 features (patient symptoms).  
-  - Dense Layers: 16 and 32 neurons with dropout regularization.  
-  - Output Layer: Sigmoid activation for binary classification.  
-- **Optimizer**: SGD with binary cross-entropy loss.  
+```bash
+.venv/bin/python -m src.data.download          # pulls MSLD v2 + HAM10000 + ISIC 2019 + symptom CSV
+.venv/bin/python -m src.data.prepare_lesion    # build the 14-class train/val/test split
+.venv/bin/python -m src.data.prepare_symptom   # clean symptom CSV (fixes the 'sum' leakage)
+```
 
----
+The 14-class lesion set is a documented composite (pox diseases + dermoscopy + healthy) — see
+`PROJECT_PLAN.md → Datasets`.
 
-## How It Works  
-1. **Upload a Skin Lesion Image** or **Input Symptoms**.  
-2. The model processes the input through the respective detection pathway:  
-   - Skin lesions are classified using the tri-net architecture.  
-   - Symptoms are analyzed using the symptom detector CNN.  
-3. Results are displayed on the screen, indicating whether Monkeypox is detected.  
+## Pipeline (once data is ready)
 
+```bash
+.venv/bin/python -m src.models.extract_features   # cache frozen-backbone features (.npy)
+.venv/bin/python -m src.models.train_base         # train the 3 classification heads
+.venv/bin/python -m src.models.pso_ensemble       # PSO weight optimization
+.venv/bin/python -m src.eval.run_all              # metrics, confusion, ROC, Kappa, Grad-CAM, ...
+.venv/bin/python -m src.models.symptom_model      # symptom CNN + LR/RF/XGBoost baselines
+```
+
+Outputs land in `results/` (figures, tables, models). Nothing paper-facing is hand-typed.
+
+## Layout
+
+```
+config.py          central config (paths, 14 class names, hyperparameters)
+src/data/          download + prepare (lesion split, symptom cleaning)
+src/models/        backbones, feature caching, base training, PSO ensemble, symptom model
+src/eval/          metrics, confusion, ROC, Grad-CAM, cross-val, McNemar, Kappa, ablation
+src/interface/     web / demo (Phase 2)
+legacy/            the original published-paper scripts, preserved for reference
+results/           generated figures, tables, trained models
+```

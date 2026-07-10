@@ -1,0 +1,25 @@
+# Environment
+.venv/
+__pycache__/
+*.pyc
+
+# Data (large; regenerate via src/data/download.py)
+data/raw/
+data/processed/
+data/features/
+
+# Trained models & big outputs
+results/models/*.keras
+results/models/*.h5
+results/models/*.npy
+results/logs/
+
+# Kaggle creds — never commit
+kaggle.json
+.kaggle/
+
+# OS
+.DS_Store
+
+# stray run log
+report.log

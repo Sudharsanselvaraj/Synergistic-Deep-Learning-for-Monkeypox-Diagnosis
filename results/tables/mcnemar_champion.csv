@@ -1,0 +1,4 @@
+comparison,statistic,p_value,significant
+Tri-Net vs ConvNeXtTiny,8.0152,0.004272,yes
+Tri-Net vs InceptionResNetV2,11.7581,0.0004971,yes
+Tri-Net vs DenseNet201,18.6182,8.699e-06,yes
