@@ -1,0 +1,4 @@
+comparison,statistic,p_value,significant
+Tri-Net vs EfficientNetB4,23.0455,7.237e-07,yes
+Tri-Net vs InceptionResNetV2,1.9608,0.1608,no
+Tri-Net vs DenseNet201,5.9211,0.01385,yes

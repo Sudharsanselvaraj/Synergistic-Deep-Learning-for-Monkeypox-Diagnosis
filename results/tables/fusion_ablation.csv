@@ -1,0 +1,6 @@
+strategy,learnable,params,accuracy,precision,recall,f1,auc,kappa,n
+Mean,no,0,75.25,76.93,79.16,77.24,97.11,72.53,303
+PSO,global,3,73.27,73.62,77.62,74.74,96.75,70.39,303
+Concat+MLP,yes,2232718,77.23,78.64,80.26,79.08,96.98,74.64,303
+GatedAttention,yes,1151375,63.37,68.7,69.6,63.21,95.61,59.8,303
+Transformer,yes,1483022,65.02,68.43,74.35,68.33,96.63,61.59,303

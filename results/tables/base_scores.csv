@@ -1,0 +1,5 @@
+backbone,accuracy,precision,recall,f1,auc,kappa,n
+ConvNeXtTiny,69.31,69.43,72.89,70.34,96.48,65.91,303
+DenseNet201,66.34,67.47,70.01,67.16,95.64,62.78,303
+EfficientNetB4,58.42,65.43,67.19,63.34,94.95,54.18,303
+InceptionResNetV2,67.99,68.54,70.53,68.83,96.24,64.38,303
