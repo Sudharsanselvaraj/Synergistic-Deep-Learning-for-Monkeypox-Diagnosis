@@ -2,24 +2,24 @@
 .venv/
 __pycache__/
 *.pyc
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
 
-# Data (large; regenerate via src/data/download.py)
+# Data (large; regenerate via `trinet download && trinet prepare`)
 data/raw/
 data/processed/
 data/features/
 
-# Trained models & big outputs
-results/models/*.keras
-results/models/*.h5
-results/models/*.npy
-results/logs/
+# Generated outputs (regenerate via the pipeline; checkpoints released separately)
+outputs/
 
-# Kaggle creds — never commit
+# Kaggle credentials — never commit
 kaggle.json
 .kaggle/
 
-# OS
+# OS / misc
 .DS_Store
-
-# stray run log
 report.log

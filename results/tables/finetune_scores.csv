@@ -1,4 +1,0 @@
-backbone,accuracy,precision,recall,f1,auc,kappa,n
-EfficientNetB4,59.08,61.36,64.32,61.65,94.59,54.45,303
-InceptionResNetV2,63.7,64.72,66.08,64.65,95.57,59.54,303
-DenseNet201,64.69,65.57,66.76,64.81,95.67,60.56,303
