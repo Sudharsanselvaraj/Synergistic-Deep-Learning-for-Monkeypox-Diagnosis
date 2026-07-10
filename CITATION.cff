@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Tri-Net v2: a reproducible deep-learning framework for Mpox skin-lesion diagnosis"
+version: 2.0.0
+date-released: 2026-07-10
+license: MIT
+repository-code: "https://github.com/Sudharsanselvaraj/Synergistic-Deep-Learning-for-Monkeypox-Diagnosis"
+authors:
+  - family-names: "S"
+    given-names: "Sudharsan"
+keywords:
+  - deep-learning
+  - medical-imaging
+  - monkeypox
+  - dermatology
+  - ensemble-learning
+  - feature-fusion
+abstract: >-
+  Tri-Net v2 is a leakage-free, reproducible benchmark and library for Mpox skin-lesion
+  diagnosis. It combines modern CNN backbones (ConvNeXt, EfficientNetV2, DenseNet,
+  InceptionResNetV2) with learned feature fusion, and reports two clearly separated tasks:
+  14-class fine-grained diagnosis and binary Mpox screening, with an honest evaluation
+  suite (cross-validation, McNemar, Cohen's Kappa, ensemble diversity, Grad-CAM).
