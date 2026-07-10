@@ -1,0 +1,12 @@
+services:
+  trinet:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: trinet:2.0.0
+    volumes:
+      - ../outputs:/app/outputs        # trained weights + generated artifacts
+      - ../data:/app/data              # datasets (optional)
+    # Run the environment check by default; override with any trinet subcommand, e.g.:
+    #   docker compose run --rm trinet predict /app/data/example.jpg
+    command: ["doctor"]
