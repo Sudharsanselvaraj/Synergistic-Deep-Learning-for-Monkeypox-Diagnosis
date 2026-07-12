@@ -1,18 +1,28 @@
 """Efficiency profile for every backbone — accuracy is only half the story for deployable AI.
 
-For each frozen backbone (+ its head) we record parameters, estimated FLOPs, on-device
-inference latency (ms/image, measured on the actual M-series GPU), and model size. Combined
-with the accuracy tables, this justifies model choices on cost as well as performance —
-what medical-AI reviewers increasingly expect.
+For each frozen backbone (+ its head) we record parameters, estimated FLOPs, inference latency
+(ms/image) and model size. Combined with the accuracy tables, this justifies model choices on
+cost as well as performance — what medical-AI reviewers increasingly expect.
+
+Runs on CPU by default: the default backbones (ConvNeXt-Tiny, EfficientNetV2-S) have no
+tensorflow-metal kernels, so profiling them on an Apple-Silicon GPU errors ("could not find
+registered platform"). Pass ``--gpu`` to measure on-device latency for Metal-compatible
+backbones (e.g. ``trinet efficiency --gpu --backbones DenseNet201``).
 
 Output: results/tables/efficiency.csv
 """
 
 from __future__ import annotations
 
+import sys
 import time
 
 import tensorflow as tf
+
+# Force CPU before the first TF op unless the user explicitly opts into the GPU. Must happen
+# here (import time), before build_full_model runs any op that would initialise Metal.
+if "--gpu" not in sys.argv:
+    tf.config.set_visible_devices([], "GPU")
 
 from trinet.config import CFG, ensure_dirs  # noqa: E402
 from trinet.models.backbones import build_full_model  # noqa: E402
@@ -67,7 +77,14 @@ def main() -> None:
 
     ap = argparse.ArgumentParser()
     ap.add_argument("--backbones", nargs="*", default=CFG.backbones)
+    ap.add_argument(
+        "--gpu",
+        action="store_true",
+        help="measure on the GPU (Metal-incompatible backbones like ConvNeXt/EffV2 will error)",
+    )
     backbones = ap.parse_args().backbones
+    device = "GPU" if tf.config.list_physical_devices("GPU") else "CPU"
+    print(f"[i] profiling on {device}")
     ensure_dirs()
     rows = [profile_backbone(bb) for bb in backbones]
     cols = ["backbone", "params_M", "gflops", "latency_ms", "size_MB"]

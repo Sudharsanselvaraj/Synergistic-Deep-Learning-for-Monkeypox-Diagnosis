@@ -131,11 +131,14 @@ def diversity():
 
 
 @app.command()
-def efficiency(backbones: list[str] | None = typer.Option(None)):
+def efficiency(
+    backbones: list[str] | None = typer.Option(None),
+    gpu: bool = typer.Option(False, help="measure on GPU (Metal lacks ConvNeXt/EffV2 ops)"),
+):
     """Efficiency profile (params, FLOPs, latency) per backbone."""
     from trinet.evaluation import efficiency as m
 
-    _run(m.main, _bb(backbones))
+    _run(m.main, _bb(backbones) + (["--gpu"] if gpu else []))
 
 
 @app.command()

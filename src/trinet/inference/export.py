@@ -15,10 +15,33 @@ from trinet.config import CFG
 from trinet.models.fusion import load_fusion
 
 
+def _mean_keras_model(bbs: list[str]):
+    """A single Keras graph equivalent to the Mean ensemble (average the per-backbone heads).
+
+    ``load_fusion`` returns a lightweight ``_MeanEnsemble`` for the Mean champion, which has no
+    exportable graph. This reconstructs the same computation as a functional model so the Mean
+    champion exports to SavedModel/ONNX like any learned fusion.
+    """
+    from tensorflow.keras import Input, Model, layers
+    from tensorflow.keras.models import load_model
+
+    from trinet.models.backbones import feature_dim
+
+    heads = [load_model(CFG.model_dir / f"head_{bb}.keras") for bb in bbs]
+    inputs = [Input(shape=(feature_dim(bb),), name=f"feat{i}") for i, bb in enumerate(bbs)]
+    outs = [h(inp) for h, inp in zip(heads, inputs)]
+    avg = outs[0] if len(outs) == 1 else layers.Average(name="mean")(outs)
+    return Model(inputs, avg, name="mean_ensemble")
+
+
 def export(fmt: str = "savedmodel", out: Path | None = None) -> Path:
     out = Path(out) if out else (CFG.outputs / "export")
     out.mkdir(parents=True, exist_ok=True)
-    model, _ = load_fusion()
+    model, bbs = load_fusion()
+    # The Mean champion is a plain averaging wrapper with no Keras graph; build an equivalent
+    # functional model so `.export()` works for every deployed strategy.
+    if not hasattr(model, "export"):
+        model = _mean_keras_model(bbs)
 
     sm_path = out / "fusion_savedmodel"
     model.export(str(sm_path))
