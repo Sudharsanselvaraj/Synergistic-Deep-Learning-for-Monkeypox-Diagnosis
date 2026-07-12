@@ -1,13 +1,17 @@
 """Train a Tri-Net head on your own class-folder dataset.
 
-Point CFG.data_proc at a directory laid out as::
+Lay out your data as class folders Keras can read::
 
-    my_data/
+    <CFG.data_proc>/
       train/<class_name>/*.jpg
       val/<class_name>/*.jpg
       test/<class_name>/*.jpg
 
-and set CFG.lesion_classes to your class names. Then cache features and train:
+Configure the run by editing ``src/trinet/config.py`` (NOT by reassigning ``CFG`` at runtime):
+set ``lesion_classes`` to your class names and, if needed, ``data_proc`` to your data root.
+``n_classes`` is derived from ``lesion_classes`` at import, and every head's output size defaults
+to it, so editing the source is the supported way to re-target the pipeline — a late
+``CFG.lesion_classes = [...]`` will not resize models already built. Then cache features and train:
 
     trinet features --backbones ConvNeXtTiny --cpu
     trinet train    --backbones ConvNeXtTiny

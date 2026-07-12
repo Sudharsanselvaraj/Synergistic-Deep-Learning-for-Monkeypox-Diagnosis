@@ -1,0 +1,22 @@
+# Build context is the repo root (see docker/Dockerfile). Keep the image small and avoid baking
+# in local state — weights and datasets are mounted at runtime via docker-compose volumes.
+.git
+.github
+.venv
+__pycache__/
+*.pyc
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+
+# Regenerated / large artifacts (mounted at runtime, not copied)
+data/
+outputs/
+notebooks/
+archive/
+
+.DS_Store
+report.log
+.vscode/

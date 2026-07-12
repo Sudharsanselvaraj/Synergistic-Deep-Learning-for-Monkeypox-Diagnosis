@@ -146,11 +146,11 @@ def fig_kappa(y, base, ens):
     plt.close(fig)
 
 
-def table_eval(y, base, ens):
+def table_eval(y, base, ens, ens_label="Tri-Net"):
     rows = []
     for bb in CFG.backbones:
         rows.append({"model": bb, **compute_scores(y, base[bb].argmax(1), base[bb]).as_pct()})
-    rows.append({"model": "Tri-Net (PSO)", **compute_scores(y, ens.argmax(1), ens).as_pct()})
+    rows.append({"model": ens_label, **compute_scores(y, ens.argmax(1), ens).as_pct()})
     cols = ["model", "accuracy", "precision", "recall", "f1", "auc", "kappa", "n"]
     (CFG.tbl_dir / f"evaluation{_SUFFIX}.csv").write_text(
         "\n".join([",".join(cols)] + [",".join(str(r[c]) for c in cols) for r in rows])
@@ -183,15 +183,24 @@ def main() -> None:
     _SUFFIX = "_champion" if args.champion else (f"_{tag}" if tag else "")
     ensure_dirs()
     y, base, ens, w = _load(tag, champion=args.champion)
+    # Label the ensemble row/print with the strategy that was actually deployed, not a hardcoded
+    # name — `--champion` reads prob_test_fusion.npy, which may be Mean/Concat+MLP/Transformer/etc.
+    if args.champion:
+        strategy = json.loads((CFG.model_dir / "fusion_meta.json").read_text()).get(
+            "strategy", "fusion"
+        )
+        ens_label = f"Tri-Net ({strategy})"
+    else:
+        ens_label = "Tri-Net (PSO)"
     fig_confusion_14(y, ens)
     fig_confusion_binary(y, ens)
     fig_roc(y, base, ens)
     fig_kappa(y, base, ens)
-    rows = table_eval(y, base, ens)
+    rows = table_eval(y, base, ens, ens_label)
     table_mcnemar(y, base, ens)
     print(
         "Ensemble:",
-        "Concat+MLP fusion (champion)" if w is None else f"weights {np.round(w, 3).tolist()}",
+        f"{ens_label} (champion)" if w is None else f"weights {np.round(w, 3).tolist()}",
     )
     for r in rows:
         print(

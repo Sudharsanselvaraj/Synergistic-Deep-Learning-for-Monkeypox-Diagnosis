@@ -3,7 +3,7 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile
-    image: trinet:2.0.0
+    image: trinet:0.9.0
     volumes:
       - ../outputs:/app/outputs        # trained weights + generated artifacts
       - ../data:/app/data              # datasets (optional)
