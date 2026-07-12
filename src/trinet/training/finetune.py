@@ -10,8 +10,8 @@ ensemble and evaluation can be re-run on the improved models:
   results/models/ft_<bb>.keras, prob_val_ft_<bb>.npy, prob_test_ft_<bb>.npy
 
 Usage:
-    python -m src.models.finetune                 # all backbones
-    python -m src.models.finetune --only DenseNet201 --epochs 10
+    trinet finetune                                  # all backbones
+    trinet finetune --backbones DenseNet201 --epochs 10
 """
 
 from __future__ import annotations
@@ -127,11 +127,11 @@ def finetune_one(bb: str, epochs: int) -> dict:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--only", nargs="*", choices=CFG.backbones)
+    ap.add_argument("--backbones", nargs="*", choices=CFG.backbones)
     ap.add_argument("--epochs", type=int, default=CFG.finetune_epochs)
     args = ap.parse_args()
     ensure_dirs()
-    rows = [finetune_one(bb, args.epochs) for bb in (args.only or CFG.backbones)]
+    rows = [finetune_one(bb, args.epochs) for bb in (args.backbones or CFG.backbones)]
     cols = ["backbone", "accuracy", "precision", "recall", "f1", "auc", "kappa", "n"]
     (CFG.tbl_dir / "finetune_scores.csv").write_text(
         "\n".join([",".join(cols)] + [",".join(str(r[c]) for c in cols) for r in rows])
