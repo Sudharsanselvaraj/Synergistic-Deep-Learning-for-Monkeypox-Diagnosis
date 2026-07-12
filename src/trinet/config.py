@@ -86,7 +86,7 @@ class CFG:
     pso_c2 = 1.5  # social
 
     # ---- symptom module ----
-    symptom_csv = data_raw / "symptom" / "DATA.csv"
+    symptom_dir = data_raw / "symptom"  # raw Kaggle download; the CSV inside is discovered by glob
     symptom_target = "MonkeyPox"
     symptom_drop = ["Patient_ID", "sum"]  # 'sum' was a leakage feature in the original code
     symptom_epochs = 70

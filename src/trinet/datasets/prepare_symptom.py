@@ -11,19 +11,35 @@ Output: data/processed/symptom.csv  (numeric, target column `MonkeyPox` in {0,1}
 
 from __future__ import annotations
 
+import sys
+
 import pandas as pd
 
 from trinet.config import CFG, ensure_dirs  # noqa: E402
 
-RAW_CSV = CFG.data_raw / "symptom" / "MonkeyPox PATIENTS Dataset.csv"
+
+def _find_raw_csv():
+    """Locate the symptom CSV in the Kaggle download without hardcoding its exact filename.
+
+    The dataset's file has been renamed across versions (e.g. 'DATA.csv',
+    'MonkeyPox PATIENTS Dataset.csv'), so glob for it and fail loudly if it isn't unique.
+    """
+    csvs = sorted(CFG.symptom_dir.glob("*.csv"))
+    if not csvs:
+        sys.exit(
+            f"[!] No symptom CSV under {CFG.symptom_dir}. Run `trinet download --only symptom`."
+        )
+    if len(csvs) > 1:
+        print(f"[i] multiple CSVs in {CFG.symptom_dir}; using {csvs[0].name}")
+    return csvs[0]
 
 
 def main() -> None:
     ensure_dirs()
-    df = pd.read_csv(RAW_CSV)
+    df = pd.read_csv(_find_raw_csv())
     print(f"[i] loaded {df.shape[0]} rows, columns: {list(df.columns)}")
 
-    df = df.drop(columns=[c for c in ("Patient_ID",) if c in df.columns])
+    df = df.drop(columns=[c for c in CFG.symptom_drop if c in df.columns])
     df = df.dropna()
 
     # one-hot the only categorical column
