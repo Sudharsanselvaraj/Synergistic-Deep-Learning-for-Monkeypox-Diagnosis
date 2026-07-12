@@ -35,7 +35,7 @@ dependencies = [
 
 [project.optional-dependencies]
 metal = ["tensorflow-metal==1.1.0"]         # Apple Silicon GPU
-dev = ["pytest>=8", "pre-commit>=3.7", "ruff>=0.5"]
+dev = ["pytest>=8", "pre-commit>=3.7", "ruff==0.15.21"]   # ruff pinned to match CI + pre-commit
 
 [project.scripts]
 trinet = "trinet.cli:app"
