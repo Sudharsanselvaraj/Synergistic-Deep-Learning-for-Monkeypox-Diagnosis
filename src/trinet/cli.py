@@ -205,13 +205,31 @@ def info():
 
 @app.command()
 def reproduce():
-    """One command to reproduce every artifact: train → fusion → evaluate → gradcam → symptom."""
+    """Reproduce every artifact end to end: data → features → train → fusion → evaluate → symptom.
+
+    Self-contained from a fresh install. The Kaggle download is skipped when the raw datasets are
+    already present; feature caching runs on CPU so it works on every platform (some backbones
+    lack Metal/GPU ops).
+    """
+    from trinet.config import CFG
+    from trinet.datasets import download as dl
+    from trinet.datasets import prepare_lesion, prepare_symptom
     from trinet.evaluation import cross_val, diversity, figures, gradcam
     from trinet.models import ensemble
     from trinet.models import fusion as fus
-    from trinet.training import base
+    from trinet.training import base, features
     from trinet.training import symptom as symp
 
+    # 1) data: fetch only if the raw datasets aren't already downloaded
+    if CFG.data_raw.exists() and any(CFG.data_raw.iterdir()):
+        print("[i] raw datasets present — skipping download")
+    else:
+        _run(dl.main, [])
+    _run(prepare_lesion.main, [])
+    _run(prepare_symptom.main, [])
+    _run(features.main, ["--cpu"])
+
+    # 2) models + evaluation
     _run(base.main, [])
     _run(ensemble.main, [])
     _run(fus.main, [])
