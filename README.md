@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/mpox_logo.png" width="260" alt="MPOX">
+<img src="assets/mpox_logo.png" width="260" alt="MPOX"> 
 
 # Tri-Net v2
 
