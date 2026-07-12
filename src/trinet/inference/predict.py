@@ -11,21 +11,36 @@ model, and returns the 14-class diagnosis plus the binary Mpox-screening decisio
 from __future__ import annotations
 
 import json
+import os
 from functools import lru_cache
 from pathlib import Path
 
-import tensorflow as tf
+from tensorflow.keras.utils import img_to_array, load_img
 
-tf.config.set_visible_devices([], "GPU")  # inference on CPU (single image is instant)
-from tensorflow.keras.utils import img_to_array, load_img  # noqa: E402
+from trinet.config import CFG
+from trinet.models.backbones import build_feature_extractor
+from trinet.models.fusion import load_fusion
 
-from trinet.config import CFG  # noqa: E402
-from trinet.models.backbones import build_feature_extractor  # noqa: E402
-from trinet.models.fusion import load_fusion  # noqa: E402
+
+def _force_cpu() -> None:
+    """Run inference on CPU (single image is instant; sidesteps Metal op gaps).
+
+    Done lazily here rather than at import so that importing this module never has the global
+    side effect of disabling the GPU for the whole process. Opt out with ``TRINET_USE_GPU=1``.
+    """
+    if os.environ.get("TRINET_USE_GPU"):
+        return
+    import tensorflow as tf
+
+    try:
+        tf.config.set_visible_devices([], "GPU")
+    except RuntimeError:
+        pass  # GPU already initialised elsewhere; op placement still falls back gracefully
 
 
 @lru_cache(maxsize=1)
 def _load():
+    _force_cpu()
     meta = CFG.model_dir / "fusion_meta.json"
     if not meta.exists():
         raise FileNotFoundError(
