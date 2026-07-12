@@ -10,6 +10,7 @@ model, and returns the 14-class diagnosis plus the binary Mpox-screening decisio
 
 from __future__ import annotations
 
+import json
 from functools import lru_cache
 from pathlib import Path
 
@@ -25,10 +26,21 @@ from trinet.models.fusion import load_fusion  # noqa: E402
 
 @lru_cache(maxsize=1)
 def _load():
-    if not (CFG.model_dir / "fusion.keras").exists():
+    meta = CFG.model_dir / "fusion_meta.json"
+    if not meta.exists():
         raise FileNotFoundError(
-            f"No fusion checkpoint in {CFG.model_dir}. Train it (`trinet fusion`) or download "
-            "released weights (fusion.keras + fusion_meta.json) into outputs/checkpoints/."
+            f"No fusion champion in {CFG.model_dir}. Train it (`trinet fusion`) or download "
+            "released weights (fusion_meta.json + fusion.keras or head_*.keras) into "
+            "outputs/checkpoints/."
+        )
+    # The Mean champion is served from the per-backbone heads (fusion.keras is intentionally
+    # absent); every learned strategy is served from fusion.keras. Check the file the deployed
+    # strategy actually needs, so a valid Mean deployment doesn't look like a missing checkpoint.
+    strategy = json.loads(meta.read_text()).get("strategy")
+    if strategy != "Mean" and not (CFG.model_dir / "fusion.keras").exists():
+        raise FileNotFoundError(
+            f"fusion_meta.json reports strategy={strategy!r} but fusion.keras is missing in "
+            f"{CFG.model_dir}. Re-run `trinet fusion`."
         )
     fusion, bbs = load_fusion()
     extractors = {bb: build_feature_extractor(bb) for bb in bbs}
