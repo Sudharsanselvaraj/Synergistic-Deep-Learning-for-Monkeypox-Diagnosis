@@ -68,13 +68,30 @@ def _collect(root: Path, aliases: list[str], exclude_aug: bool) -> list[Path]:
 
 
 def _split(files: list[Path], rng: np.random.Generator) -> dict[str, list[Path]]:
-    idx = rng.permutation(len(files))
     n = len(files)
+    ordered = [files[i] for i in rng.permutation(n)]
+
+    # A class with too few images would otherwise round down to an empty val or test split,
+    # which silently breaks that class's per-class metrics (recall/ROC undefined). Guard it.
+    if n < 3:
+        print(f"[!] class has only {n} image(s); all assigned to train (val/test empty)")
+        return {"train": ordered, "val": [], "test": []}
+
     n_tr = int(round(CFG.train_frac * n))
     n_va = int(round(CFG.val_frac * n))
-    tr = [files[i] for i in idx[:n_tr]]
-    va = [files[i] for i in idx[n_tr : n_tr + n_va]]
-    te = [files[i] for i in idx[n_tr + n_va :]]
+    tr, va, te = ordered[:n_tr], ordered[n_tr : n_tr + n_va], ordered[n_tr + n_va :]
+
+    if not va or not te:
+        # small class: force >=1 sample into each of val and test (normal-sized classes are
+        # unaffected, so previously-reported splits/numbers do not change)
+        n_va = max(1, n_va)
+        n_te = max(1, n - n_tr - n_va)
+        n_tr = n - n_va - n_te
+        tr, va, te = ordered[:n_tr], ordered[n_tr : n_tr + n_va], ordered[n_tr + n_va :]
+        print(
+            f"[!] small class ({n} images): adjusted split -> train={n_tr} val={n_va} test={n_te}"
+        )
+
     return {"train": tr, "val": va, "test": te}
 
 
