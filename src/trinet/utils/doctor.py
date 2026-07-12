@@ -7,6 +7,7 @@ glance what still needs setting up.
 
 from __future__ import annotations
 
+import json
 import platform
 import sys
 from pathlib import Path
@@ -48,7 +49,24 @@ def run() -> None:
 
     _exists(CFG.data_proc, "Dataset split", "run `trinet download && trinet prepare`")
     _exists(CFG.features, "Cached features", "run `trinet features`")
-    _exists(CFG.model_dir / "fusion.keras", "Champion checkpoint", "run `trinet fusion`")
+
+    # A learned champion lives in fusion.keras; the Mean champion is served from head_*.keras
+    # (fusion.keras is intentionally absent), so check the files the deployed strategy needs.
+    meta = CFG.model_dir / "fusion_meta.json"
+    champion_ok, detail = False, "missing — run `trinet fusion`"
+    if meta.exists():
+        info = json.loads(meta.read_text())
+        strat = info.get("strategy")
+        if strat == "Mean":
+            bbs = info.get("backbones", [])
+            champion_ok = bool(bbs) and all(
+                (CFG.model_dir / f"head_{bb}.keras").exists() for bb in bbs
+            )
+            detail = f"Mean ensemble ({len(bbs)} heads)" if champion_ok else "Mean — heads missing"
+        else:
+            champion_ok = (CFG.model_dir / "fusion.keras").exists()
+            detail = f"{strat} (fusion.keras)" if champion_ok else f"{strat} — fusion.keras missing"
+    rows.append(_line(OK if champion_ok else WARN, "Champion checkpoint", detail))
     kaggle = (Path.home() / ".kaggle" / "kaggle.json").exists() or (
         Path.home() / ".kaggle" / "access_token"
     ).exists()
