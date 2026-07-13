@@ -322,11 +322,11 @@ Apple-Metal specifics): [`docs/reproducibility.md`](docs/reproducibility.md).
 
 ## Original publication
 
-> **Tri-Net: Unified Deep Learning for Skin Lesion and Symptom-Based Monkeypox Detection**
-> Sudharsan S · Prabu Selvam† · Nirmala Veeramani† · Kiran Kumar B · Nikola Ivković · Korhan Cengiz
-> *Scientific Reports* (Springer Nature, Nature Portfolio), **published 13 July 2026** · open access
+> **Tri-Net: unified deep learning for skin lesion and symptom-based monkeypox detection**
+> S. Sudharsan · Prabu Selvam† · Nirmala Veeramani† · B. Kiran Kumar · Nikola Ivković · Korhan Cengiz
+> *Scientific Reports* (2026) · **published 13 July 2026** · open access (CC BY-NC-ND 4.0)
 > [doi.org/10.1038/s41598-026-61490-x](https://doi.org/10.1038/s41598-026-61490-x)
-> † Corresponding authors
+> † Corresponding authors · Received 18 Nov 2025 · Accepted 06 Jul 2026
 
 This repository is the code artifact referenced by the paper's **Code Availability** statement — a
 from-scratch, tested, reproducible implementation that keeps the paper's core idea (a Tri-Net
@@ -348,11 +348,14 @@ The original study scripts are preserved unmodified under [`archive/`](archive/)
 If you use Tri-Net in your research, please cite the paper and the software framework (see
 [`CITATION.cff`](CITATION.cff) for the machine-readable entry):
 
+> Sudharsan, S., Selvam, P., Veeramani, N. et al. Tri-Net: unified deep learning for skin lesion and
+> symptom-based monkeypox detection. *Sci Rep* (2026). https://doi.org/10.1038/s41598-026-61490-x
+
 ```bibtex
-@article{selvaraj2026trinet,
-  title   = {Tri-Net: Unified Deep Learning for Skin Lesion and Symptom-Based Monkeypox Detection},
-  author  = {Selvaraj, Sudharsan and Selvam, Prabu and Veeramani, Nirmala and
-             Kumar B, Kiran and Ivkovi{\'c}, Nikola and Cengiz, Korhan},
+@article{sudharsan2026trinet,
+  title   = {Tri-Net: unified deep learning for skin lesion and symptom-based monkeypox detection},
+  author  = {Sudharsan, S. and Selvam, Prabu and Veeramani, Nirmala and
+             Kiran Kumar, B. and Ivkovi{\'c}, Nikola and Cengiz, Korhan},
   journal = {Scientific Reports},
   publisher = {Springer Nature},
   year    = {2026},
@@ -361,7 +364,7 @@ If you use Tri-Net in your research, please cite the paper and the software fram
 }
 
 @software{trinet_v2_2026,
-  author  = {Selvaraj, Sudharsan},
+  author  = {Sudharsan, S.},
   title   = {Tri-Net v2: A Reproducible Deep-Learning Framework for Mpox Skin-Lesion Diagnosis},
   year    = {2026},
   url     = {https://github.com/Sudharsanselvaraj/Synergistic-Deep-Learning-for-Monkeypox-Diagnosis}

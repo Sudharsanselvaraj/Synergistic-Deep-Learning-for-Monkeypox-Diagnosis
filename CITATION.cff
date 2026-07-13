@@ -6,8 +6,8 @@ date-released: 2026-07-10
 license: MIT
 repository-code: "https://github.com/Sudharsanselvaraj/Synergistic-Deep-Learning-for-Monkeypox-Diagnosis"
 authors:
-  - family-names: "S"
-    given-names: "Sudharsan"
+  - family-names: "Sudharsan"
+    given-names: "S."
 keywords:
   - deep-learning
   - medical-imaging
@@ -23,21 +23,25 @@ abstract: >-
   suite (cross-validation, McNemar, Cohen's Kappa, ensemble diversity, Grad-CAM).
 preferred-citation:
   type: article
-  title: "Tri-Net: Unified Deep Learning for Skin Lesion and Symptom-Based Monkeypox Detection"
+  title: "Tri-Net: unified deep learning for skin lesion and symptom-based monkeypox detection"
   journal: "Scientific Reports"
+  publisher:
+    name: "Springer Nature"
+  issn: "2045-2322"
   year: 2026
   month: 7
+  date-published: 2026-07-13
   doi: "10.1038/s41598-026-61490-x"
   url: "https://doi.org/10.1038/s41598-026-61490-x"
   authors:
-    - family-names: "S"
-      given-names: "Sudharsan"
+    - family-names: "Sudharsan"
+      given-names: "S."
     - family-names: "Selvam"
       given-names: "Prabu"
     - family-names: "Veeramani"
       given-names: "Nirmala"
-    - family-names: "B"
-      given-names: "Kiran Kumar"
+    - family-names: "Kiran Kumar"
+      given-names: "B."
     - family-names: "Ivković"
       given-names: "Nikola"
     - family-names: "Cengiz"
