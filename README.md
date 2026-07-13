@@ -216,10 +216,12 @@ more capacity is *not* automatically better:
 
 | | |
 |:---:|:---:|
-| <img src="assets/confusion_matrix.png" width="420"/> | <img src="assets/roc_curves.png" width="420"/> |
+| <img src="assets/confusion_matrix.png" width="410"/> | <img src="assets/roc_curves.png" width="410"/> |
 | <sub>14-class confusion matrix (leakage-free test set)</sub> | <sub>ROC — binary Mpox screening</sub> |
-| <img src="assets/gradcam.png" width="420"/> | <img src="assets/benchmark.png" width="420"/> |
-| <sub>Grad-CAM — where the model looks</sub> | <sub>Backbone & fusion benchmark</sub> |
+
+<img src="assets/gradcam.png" width="820"/>
+
+<sub>Grad-CAM — where each backbone actually looks</sub>
 
 </div>
 
