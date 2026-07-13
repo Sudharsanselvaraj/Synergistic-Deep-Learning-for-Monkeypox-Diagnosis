@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/mpox_logo.png" alt="Tri-Net" width="360"/>
+<img src="assets/mpox_logo.png" alt="Tri-Net" width="260"/>
 
 # Tri-Net
 
@@ -238,7 +238,7 @@ Tri-Net is an installable Python package (`src/trinet`) with a thin `trinet` CLI
 cacheable pipeline:
 
 ```
-datasets ──► features ──► base heads ──► ensemble ─┐
+datasets ──► features ──► base heads ──► ensemble  ─┐
  (download,   (frozen      (per-backbone  (PSO /    ├─► evaluation
   prepare)     backbone     classifier)    mean)    │    (metrics, confusion,
                cache)                               │     ROC, κ, McNemar,
