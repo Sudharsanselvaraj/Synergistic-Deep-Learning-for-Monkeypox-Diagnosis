@@ -21,3 +21,24 @@ abstract: >-
   InceptionResNetV2) with learned feature fusion, and reports two clearly separated tasks:
   14-class fine-grained diagnosis and binary Mpox screening, with an honest evaluation
   suite (cross-validation, McNemar, Cohen's Kappa, ensemble diversity, Grad-CAM).
+preferred-citation:
+  type: article
+  title: "Tri-Net: Unified Deep Learning for Skin Lesion and Symptom-Based Monkeypox Detection"
+  journal: "Scientific Reports"
+  year: 2026
+  month: 7
+  doi: "10.1038/s41598-026-61490-x"
+  url: "https://doi.org/10.1038/s41598-026-61490-x"
+  authors:
+    - family-names: "S"
+      given-names: "Sudharsan"
+    - family-names: "Selvam"
+      given-names: "Prabu"
+    - family-names: "Veeramani"
+      given-names: "Nirmala"
+    - family-names: "B"
+      given-names: "Kiran Kumar"
+    - family-names: "Ivković"
+      given-names: "Nikola"
+    - family-names: "Cengiz"
+      given-names: "Korhan"
